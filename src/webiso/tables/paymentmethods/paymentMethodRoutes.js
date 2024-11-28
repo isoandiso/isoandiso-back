@@ -13,4 +13,11 @@ router.get('/payments', verifyCompanyToken, paymentsMethodController.getAllPayme
 router.get('/payments/:id', verifyCompanyToken, paymentsMethodController.getPaymentMethodById);
 router.delete('/payments/:id', verifyCompanyToken, paymentsMethodController.deletePaymentMethodById);
 
+// ... (configurar PayPal)
+
+router.post('/create-payment', async (req, res) => {
+    
+
+});
+
 module.exports = router;

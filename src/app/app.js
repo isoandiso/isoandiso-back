@@ -36,6 +36,7 @@ const rutas = [
   require('../webiso/tables/rol/rolRoutes'),
   require('../webiso/tables/sede/sedeRoutes'),
   require('../webiso/tables/tipodeadquisicion/tipoDeAdquisicionRoutes'),
+  require('../webiso/tables/paymentmethods/paymentMethodRoutes'),
 ];
 rutas.forEach(route => app.use(route));
 

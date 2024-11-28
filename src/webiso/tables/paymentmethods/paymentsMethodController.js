@@ -1,4 +1,5 @@
 const paymentMethodService = require('./paymentMethodService');
+const paypal = require('paypal-rest-sdk');
 
 //Crear methodo de pago
 const createPaymentMethod = async (req, res) => {
@@ -42,6 +43,7 @@ const deletePaymentMethodById = async (req, res) => {
     res.status(error.statusCode || 500).json({ message: 'Error eliminando methodo de pago por ID', error: error.message });
   }
 };
+
 
 module.exports = {
   createPaymentMethod,
