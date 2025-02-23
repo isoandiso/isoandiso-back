@@ -3,7 +3,7 @@ const workerService = require('./workerService');
 //Registro de trabajador
 /*
 (el trabajador ya se habrá creado antes desde la vista de asignación de responsable digital de la parte de "Adquisiciones" con todos los campos exceptuando los campos "nombre","apellido"
- y "contraseña", los cuales se asignarán acá desde el modulo de trabajadores)
+ y "contraseña", los cuales se asignarán acá desde la página de trabajadores)
 */
 const register = async (req, res) => {
   try {
