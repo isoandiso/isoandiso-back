@@ -14,9 +14,9 @@ const companyAreaSchema = new mongoose.Schema({
     ref: 'iso',
     default: null
   }],
-  responsibleWorkerId:{
+  responsibleEmployeeId:{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'worker',
+    ref: 'employee',
     default: null
   }
 });

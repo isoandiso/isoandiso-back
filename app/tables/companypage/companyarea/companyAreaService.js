@@ -44,11 +44,11 @@ const deleteIsos = async (req) => {
   return updatedArea;
 };
 
-const deleteWorker = async (req) => {
+const deleteEmployee = async (req) => {
   const companyAreaId = req.params.id;
   const updatedArea = await companyAreaSchema.findByIdAndUpdate(
     companyAreaId,
-    { $set: { responsibleWorkerId: null } },
+    { $set: { responsibleEmployeeId: null } },
     { new: true }
   );
   if (!updatedArea) {
@@ -81,13 +81,13 @@ const addIso = async (req) => {
   return companyArea;
 };
 
-const updateResponsibleWorker = async (req) => {
+const updateResponsibleEmployee = async (req) => {
   const areaId = req.params.id;
-  const { responsibleWorkerId } = req.body;
+  const { responsibleEmployeeId } = req.body;
 
   const area = await companyAreaSchema.findByIdAndUpdate(
     areaId,
-    { $set: { responsibleWorkerId: responsibleWorkerId } },
+    { $set: { responsibleEmployeeId: responsibleEmployeeId } },
     { new: true }
   );
   if (!area) {
@@ -105,7 +105,7 @@ module.exports = {
   getChargeOfHigherHierarchyOfArea,
   deleteCompanyArea,
   deleteIsos,
-  deleteWorker,
+  deleteEmployee,
   addIso,
-  updateResponsibleWorker
+  updateResponsibleEmployee
 };

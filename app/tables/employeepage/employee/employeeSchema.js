@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const workerSchema = new mongoose.Schema({
+const employeeSchema = new mongoose.Schema({
   name:{
     type: String,
     default: null
@@ -56,7 +56,7 @@ const workerSchema = new mongoose.Schema({
   },
   nationalityId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'nationalityWorker',
+    ref: 'nationalityEmployee',
     required: true
   },
   gender: { 
@@ -77,7 +77,7 @@ const workerSchema = new mongoose.Schema({
     enum: ['Activo', 'Inactivo'],
     required: true
   },
-  workSiteId: {
+  employeeSiteId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'companySite',
     required: true
@@ -101,9 +101,9 @@ const workerSchema = new mongoose.Schema({
 });
 
 // Middleware pre-save para convertir el email a minúsculas
-workerSchema.pre('save', function(next) {
+employeeSchema.pre('save', function(next) {
   this.email = this.email.toLowerCase();
   next();
 });
 
-module.exports = mongoose.model('worker', workerSchema);
+module.exports = mongoose.model('employee', employeeSchema);

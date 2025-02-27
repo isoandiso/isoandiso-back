@@ -1,5 +1,5 @@
 const companySchema = require('./companySchema.js');
-const workerSchema = require('../../workerpage/worker/workerSchema.js');
+const employeeSchema = require('../../employeepage/employee/employeeSchema.js');
 const bcrypt = require('bcryptjs');
 const { createToken } = require('../../../token.js');
 
@@ -30,7 +30,7 @@ const register = async (req) => {
     { path: 'areaIds',
       populate: [
         { path: 'isoIds' },
-        { path: 'responsibleWorkerId' },
+        { path: 'responsibleEmployeeId' },
       ]  },
   ])
   .exec();
@@ -61,7 +61,7 @@ const login = async (req) => {
     { path: 'areaIds',
       populate: [
         { path: 'isoIds' },
-        { path: 'responsibleWorkerId' },
+        { path: 'responsibleEmployeeId' },
       ]  },
   ])
   .exec();
@@ -103,7 +103,7 @@ const profile = async (req) => {
     { path: 'areaIds',
       populate: [
         { path: 'isoIds' },
-        { path: 'responsibleWorkerId' },
+        { path: 'responsibleEmployeeId' },
       ]  },
   ])
   .exec();
@@ -412,14 +412,14 @@ const addArea = async (req) => {
   return updatedCompany;
 };
 
-const createWorker = async (req) => {
-  const worker = new workerSchema(req.body);
-  worker.save();
-  return worker
+const createEmployee = async (req) => {
+  const employee = new employeeSchema(req.body);
+  employee.save();
+  return employee
 };
 
 module.exports = {
-  createWorker,
+  createEmployee,
   register,
   login,
   profile,

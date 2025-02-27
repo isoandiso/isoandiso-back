@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const subcompanyWorkerSchema = new mongoose.Schema({
+const subcompanyEmployeeSchema = new mongoose.Schema({
   dni: {type: String, required: true},
   name: {type: String, required: true},
   mothers_lastname: {type: String, required: true},
@@ -27,7 +27,7 @@ const subcompanyWorkerSchema = new mongoose.Schema({
   },
   nationalityId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'nationalityWorker',
+    ref: 'nationalityEmployee',
     default: null
   },
   gender: { 
@@ -48,10 +48,10 @@ const subcompanyWorkerSchema = new mongoose.Schema({
     enum: ['Activo', 'Inactivo'],
     required: true
   },
-  workSite: {type: String, required: true},
+  employeeSite: {type: String, required: true},
   sizePants: {type: Number, required: true, enum: [26, 28, 30, 32, 34, 36, 38, 40, 42, 44]},
   sizePolo: {type: String, required: true, enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']},
   sizeShoe: {type: Number, required: true, enum: [36, 38, 40, 42, 44]},
 });
 
-module.exports = mongoose.model('subcompanyWorker', subcompanyWorkerSchema);
+module.exports = mongoose.model('subcompanyEmployee', subcompanyEmployeeSchema);

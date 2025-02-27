@@ -31,7 +31,7 @@ router.get('/company/:id/country', verifyToken, companyController.getCompanyCoun
 router.get('/company/:id/acquisitions', verifyToken, companyController.getCompanyAcquisitions);
 router.delete('/company/:id', verifyToken, companyController.deleteCompany);
 
-//(endpoint que crea un trabajador en la tabla "Worker")
-router.post('/company/createWorker',verifyToken, companyController.createWorker);
+//(endpoint que crea un trabajador en la tabla "Employee")
+router.post('/company/createEmployee',verifyToken, companyController.createEmployee);
 
 module.exports = router;

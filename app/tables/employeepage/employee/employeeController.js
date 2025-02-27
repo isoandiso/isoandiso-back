@@ -1,4 +1,4 @@
-const workerService = require('./workerService');
+const employeeService = require('./employeeService');
 
 //Registro de trabajador
 /*
@@ -7,14 +7,14 @@ const workerService = require('./workerService');
 */
 const register = async (req, res) => {
   try {
-    const { token, worker } = await workerService.register(req);
+    const { token, employee } = await employeeService.register(req);
     res.cookie('token', token, {
       httpOnly: true,
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'None'
     });
-    res.status(201).json(worker);
+    res.status(201).json(employee);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error registrando al trabajador', error: error.message });
   }
@@ -23,14 +23,14 @@ const register = async (req, res) => {
 //Inicio de sesión del trabajador
 const login = async (req, res) => {
   try {
-    const { token, worker } = await workerService.login(req);
+    const { token, employee } = await employeeService.login(req);
     res.cookie('token', token, {
       httpOnly: true,
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
       sameSite: 'None'
     });
-    res.status(200).json(worker);
+    res.status(200).json(employee);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error logeándose con el trabajador', error: error.message });
   }
@@ -49,63 +49,63 @@ const logout = async (req, res) => {
 //Obtener perfil del trabajador
 const profile = async (req, res) => {
   try {
-    const worker = await workerService.profile(req);
-    res.status(200).json(worker);
+    const employee = await employeeService.profile(req);
+    res.status(200).json(employee);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error al obtener el perfil del trabajador', error: error.message });
   }
 };
 
 //Obtener todos los trabajadores de la empresa
-const getAllCompanyWorkers = async (req, res) => {
+const getAllCompanyEmployees = async (req, res) => {
   try {
-    const workers = await workerService.getAllCompanyWorkers();
-    res.status(200).json(workers);
+    const employees = await employeeService.getAllCompanyEmployees();
+    res.status(200).json(employees);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error obteniendo todos los trabajadores', error: error.message });
   }
 };
 
 //Obtener trabajador por ID
-const getCompanyWorker = async (req, res) => {
+const getCompanyEmployee = async (req, res) => {
   try {
-    const worker = await workerService.getCompanyWorker(req);
-    if (!worker) {
+    const employee = await employeeService.getCompanyEmployee(req);
+    if (!employee) {
       return res.status(404).json({ message: 'Trabajador no encontrado' });
     }
-    res.status(200).json(worker);
+    res.status(200).json(employee);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error obteniendo el trabajador', error: error.message });
   }
 };
 
 //Obtener trabajador por email
-const getCompanyWorkerByEmail = async (req, res) => {
+const getCompanyEmployeeByEmail = async (req, res) => {
   try {
-    const worker = await workerService.getCompanyWorkerByEmail(req);
-    if (!worker) {
+    const employee = await employeeService.getCompanyEmployeeByEmail(req);
+    if (!employee) {
       return res.status(404).json({ message: 'Trabajador no encontrado' });
     }
-    res.status(200).json(worker);
+    res.status(200).json(employee);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error obteniendo el trabajador', error: error.message });
   }
 };
 
 //Actualizar trabajador por ID
-const updateCompanyWorker = async (req, res) => {
+const updateCompanyEmployee = async (req, res) => {
   try {
-    const worker = await workerService.updateCompanyWorker(req);
-    res.status(200).json(worker);
+    const employee = await employeeService.updateCompanyEmployee(req);
+    res.status(200).json(employee);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error actualizando al trabajador', error: error.message });
   }
 };
 
 //Eliminar trabajador por ID
-const deleteCompanyWorker = async (req, res) => {
+const deleteCompanyEmployee = async (req, res) => {
   try {
-    await workerService.deleteCompanyWorker(req);
+    await employeeService.deleteCompanyEmployee(req);
     res.status(200).json({ message: 'Trabajador eliminado satisfactoriamente' });
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error eliminando al trabajador', error: error.message });
@@ -117,9 +117,9 @@ module.exports = {
   login,
   logout,
   profile,
-  getAllCompanyWorkers,
-  getCompanyWorker,
-  getCompanyWorkerByEmail,
-  updateCompanyWorker,
-  deleteCompanyWorker,
+  getAllCompanyEmployees,
+  getCompanyEmployee,
+  getCompanyEmployeeByEmail,
+  updateCompanyEmployee,
+  deleteCompanyEmployee,
 };
