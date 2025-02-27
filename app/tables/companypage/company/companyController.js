@@ -236,17 +236,17 @@ const addArea = async (req, res) => {
 };
 
 //Crear trabajador en la tabla trabajador
-const createWorker = async (req, res) => {
+const createEmployee = async (req, res) => {
   try {
-    const worker = await companyService.createWorker(req);
-    res.status(201).json(worker);
+    const employee = await companyService.createEmployee(req);
+    res.status(201).json(employee);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error creando el trabajador', error: error.message });
   }
 };
 
 module.exports = {
-  createWorker,
+  createEmployee,
   register,
   login,
   logout,

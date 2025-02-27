@@ -65,9 +65,9 @@ const deleteIsos = async (req, res) => {
 };
 
 //Eliminar el trabajador del área
-const deleteWorker = async (req, res) => {
+const deleteEmployee = async (req, res) => {
   try {
-    await companyAreaService.deleteWorker(req);
+    await companyAreaService.deleteEmployee(req);
     res.status(200).json({ message: 'El trabajador del área se eleminó satisfactoriamente' });
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error eliminando el trabajador del área', error: error.message });
@@ -85,9 +85,9 @@ const addIso = async (req, res) => {
 };
 
 //Actualizar el trabajador responsable del área
-const updateResponsibleWorker = async (req, res) => {
+const updateResponsibleEmployee = async (req, res) => {
   try {
-    const companyArea = await companyAreaService.updateResponsibleWorker(req);
+    const companyArea = await companyAreaService.updateResponsibleEmployee(req);
     res.status(200).json(companyArea);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error agregando el trabajador responsable del área', error: error.message });
@@ -101,7 +101,7 @@ module.exports = {
   getChargeOfHigherHierarchyOfArea,
   deleteCompanyArea,
   deleteIsos,
-  deleteWorker,
+  deleteEmployee,
   addIso,
-  updateResponsibleWorker,
+  updateResponsibleEmployee,
 };
