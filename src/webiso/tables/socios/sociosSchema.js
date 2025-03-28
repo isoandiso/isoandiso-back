@@ -8,24 +8,24 @@ const socioSchema = new mongoose.Schema(
       unique: true,
       trim: true,
     },
-    nombre: {
+    firstname: {
       type: String,
       required: true,
       trim: true,
     },
-    apellido: {
+    lastname: {
       type: String,
       required: true,
       trim: true,
     },
-    contraseña: {
+    password: {
       type: String,
       required: true,
     },
     rol: {
     //   type: mongoose.Schema.Types.ObjectId,
     type: String,
-      ref: 'rol', // Referencia al esquema de roles
+      // ref: 'rol', // Referencia al esquema de roles
       required: true,
     },
     pais: {
@@ -38,7 +38,7 @@ const socioSchema = new mongoose.Schema(
         type: String,
       //   type: mongoose.Schema.Types.ObjectId,
       //   ref: 'iso', // Referencia al esquema de países
-      required: true,
+      required: false,
     },
     estatus: {
       type: String,
