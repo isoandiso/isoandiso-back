@@ -42,7 +42,7 @@ const rutas = [
   require('./tables/companypage/iso/isoRoutes'),
   require('./tables/companypage/companycountry/companyCountryRoutes'),
   require('./tables/employeepage/rol/rolRoutes'),
-  require('./tables/employeepage/employeeNationality/employeeNationalityRoutes'),
+  require('./tables/employeepage/employeenationality/employeeNationalityRoutes'),
   require('./tables/companypage/companysite/companySiteRoutes'),
   require('./tables/companypage/companyacquisitiontype/companyAcquisitionTypeRoutes'),
 ];
