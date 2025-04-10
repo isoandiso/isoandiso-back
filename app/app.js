@@ -49,7 +49,7 @@ const rutas = [
 ];
 rutas.forEach(route => app.use(route));
 
-const swaggerFile = require('./swagger-output.json');
+const swaggerFile = require('./../swagger-output.json');
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 
