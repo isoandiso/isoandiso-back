@@ -6,6 +6,10 @@ const cookieParser = require('cookie-parser');
 const app = express();
 const swaggerUi = require('swagger-ui-express');
 
+// Swagger
+const swaggerFile = require('./../swagger-output.json');
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
+
 // Conectar a la base de datos
 async function connectToMongoose() {
   try {
@@ -48,10 +52,6 @@ const rutas = [
   require('./tables/companypage/companyacquisitiontype/companyAcquisitionTypeRoutes'),
 ];
 rutas.forEach(route => app.use(route));
-
-const swaggerFile = require('./../swagger-output.json');
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
-
 
 // Error handler
 app.use((err, req, res, next) => {
