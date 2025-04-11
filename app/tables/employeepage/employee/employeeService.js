@@ -10,53 +10,50 @@ const { createToken } = require('../../../token.js');
 */
 const register = async (req) => {
   const { email, name, lastname, password } = req.body;
+
+  //si no se encontró el empleado con dicho email retornamos los datos con null
   const employee = await employeeSchema.findOne({ email });
   if (!employee) {
-    const error = new Error("Trabajador no encontrado");
-    error.statusCode = 404;
-    throw error;
+    return { token:null, employee: null };
+  }else{
+    const passwordHash = await bcrypt.hash(password, 10);
+    employee.name = name;
+    employee.lastname = lastname;
+    employee.password = passwordHash;
+    const updatedEmployee = await employee.save();
+    const employeeObject = updatedEmployee.toObject();
+    delete employeeObject.password;
+    const token = createToken({ id: employeeObject._id });
+    return { token, employee: employeeObject};
   }
-  const passwordHash = await bcrypt.hash(password, 10);
-  employee.name = name;
-  employee.lastname = lastname;
-  employee.password = passwordHash;
-  const updatedEmployee = await employee.save();
-  const employeeObject = updatedEmployee.toObject();
-  delete employeeObject.password;
-  const token = createToken({ id: employeeObject._id });
-  return { token, employee: employeeObject};
 };
 
 const login = async (req) => {
   const { email, password } = req.body;
   const employeeFinded = await employeeSchema.findOne({ email });
-  if (!employeeFinded) {
-    const error = new Error("Algunos de los datos son incorrectos o no está registrado");
-    error.statusCode = 404;
-    throw error;
+  
+  //si no se encontró el empleado con dicho email o las contraseñas no coindiden retornamos los datos con null
+  if (!employeeFinded | !(await bcrypt.compare(password, employeeFinded.password))) {
+    return { token:null, employee: null };
   }
-  const isMatch = await bcrypt.compare(password, employeeFinded.password);
-  if (!isMatch) {
-    const error = new Error("Algunos de los datos son incorrectos o no está registrado");
-    error.statusCode = 400;
-    throw error;
+  //sino retornamos el token y el empleado
+  else{
+    const token = createToken({ id: employeeFinded._id });
+    const employeeObject = employeeFinded.toObject();
+    delete employeeObject.password;
+    return { token, employee: employeeObject };
   }
-  const token = createToken({ id: employeeFinded._id });
-  const employeeObject = employeeFinded.toObject();
-  delete employeeObject.password;
-  return { token, employee: employeeObject };
 };
 
 const profile = async (req) => {
   const employeeFinded = await employeeSchema.findById(req.profile.id);
   if (!employeeFinded) {
-    const error = new Error("Trabajador no encontrado");
-    error.statusCode = 404;
-    throw error;
+    return null;
+  }else{
+    const employeeObject = employeeFinded.toObject();
+    delete employeeObject.password;
+    return employeeObject;
   }
-  const employeeObject = employeeFinded.toObject();
-  delete employeeObject.password;
-  return employeeObject;
 };
 
 //COMMONS
@@ -73,12 +70,10 @@ const getCompanyEmployee = async (req) => {
 };
 
 const getCompanyEmployeeByEmail = async (req) => {
-  const { email } = req.body;
+  const email = req.params.email;
   const employee = await employeeSchema.findOne({ email });
   if (!employee) {
-    const error = new Error("Trabajador no encontrado");
-    error.statusCode = 404;
-    throw error;
+    return null;
   }
   return employee;
 };

@@ -8,13 +8,17 @@ const employeeService = require('./employeeService');
 const register = async (req, res) => {
   try {
     const { token, employee } = await employeeService.register(req);
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: 'None'
-    });
-    res.status(201).json(employee);
+    if(token === null){
+      res.status(404).json({message: "No se encontró el empleado con dicho mail"});
+    }else{
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'None'
+      });
+      res.status(200).json(employee);
+    }
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error registrando al trabajador', error: error.message });
   }
@@ -24,13 +28,17 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { token, employee } = await employeeService.login(req);
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
-      sameSite: 'None'
-    });
-    res.status(200).json(employee);
+    if(token === null){
+      res.status(404).json({message: "No se encontró el empleado con dicho mail o la contraseña no coincide"});
+    }else{
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 24 * 60 * 60 * 1000,
+        sameSite: 'None'
+      });
+      res.status(200).json(employee);
+    }
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error logeándose con el trabajador', error: error.message });
   }
@@ -50,7 +58,11 @@ const logout = async (req, res) => {
 const profile = async (req, res) => {
   try {
     const employee = await employeeService.profile(req);
-    res.status(200).json(employee);
+    if(!employee){
+      res.status(404).json({message: "No se encontró el empleado con dicho ID"});
+    }else{
+      res.status(200).json(employee);
+    }
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error al obtener el perfil del trabajador', error: error.message });
   }
@@ -71,7 +83,7 @@ const getCompanyEmployee = async (req, res) => {
   try {
     const employee = await employeeService.getCompanyEmployee(req);
     if (!employee) {
-      return res.status(404).json({ message: 'Trabajador no encontrado' });
+      return res.status(404).json({ message: 'Empleado no encontrado' });
     }
     res.status(200).json(employee);
   } catch (error) {
@@ -83,10 +95,11 @@ const getCompanyEmployee = async (req, res) => {
 const getCompanyEmployeeByEmail = async (req, res) => {
   try {
     const employee = await employeeService.getCompanyEmployeeByEmail(req);
-    if (!employee) {
-      return res.status(404).json({ message: 'Trabajador no encontrado' });
+    if(!employee){
+      res.status(404).json({message: "No se encontró el empleado con dicho mail"});
+    }else{
+      res.status(200).json(employee);
     }
-    res.status(200).json(employee);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error obteniendo el trabajador', error: error.message });
   }
