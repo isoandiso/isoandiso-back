@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
 
 const employeeSchema = new mongoose.Schema({
   name:{
@@ -20,7 +21,28 @@ const employeeSchema = new mongoose.Schema({
       message: `El email debe ser una dirección de Gmail válida`
     }
   },
-  password: { type: String, default: null },
+  password: { type: String, default: null,validate: {
+    validator: function(v) {
+      // Mínimo 8
+      if (v.length < 8) {
+        return false;
+      }
+      // Al menos una letra
+      if (!/[a-zA-Z]/.test(v)) {
+        return false;
+      }
+      // Al menos un número
+      if (!/[0-9]/.test(v)) {
+        return false;
+      }
+      // Al menos un símbolo (caracteres no alfanuméricos ni espacio)
+      if (!/[^a-zA-Z0-9\s]/.test(v)) {
+        return false;
+      }
+      return true;
+    },
+    message: `La contraseña debe tener como minimo 8 caracteres y contener al menos una letra, un número y un símbolo.`
+  } },
   dni: {type: String, required: true, match:[/^[A-Za-z0-9- ]{5,15}$/, "Dni no válido"], maxlength: 20},
   mothers_lastname: {type: String, required: true, maxlength: 20},
   fathers_lastname: {type: String, required: true, maxlength: 20},
@@ -100,9 +122,10 @@ const employeeSchema = new mongoose.Schema({
   timestamps: true 
 });
 
-// Middleware pre-save para convertir el email a minúsculas
-employeeSchema.pre('save', function(next) {
+// Middleware pre-save para convertir el email a minúsculas y hashear la contraseña
+employeeSchema.pre('save', async function(next) {
   this.email = this.email.toLowerCase();
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 

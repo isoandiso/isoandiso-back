@@ -6,8 +6,7 @@ const { createToken } = require('../../../token.js');
 
 const register = async (req) => {
   const { name, lastname, email, password } = req.body;
-  const passwordHash = await bcrypt.hash(password, 10);
-  const newUser = new userSchema({ name, lastname, email, password: passwordHash });
+  const newUser = new userSchema({ name, lastname, email, password });
   const userSaved = await newUser.save();
   const userObject = userSaved.toObject();
   delete userObject.password;

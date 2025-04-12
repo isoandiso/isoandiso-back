@@ -7,8 +7,7 @@ const { createToken } = require('../../../token.js');
 
 const register = async (req) => {
   const { email, phone, password } = req.body;
-  const passwordHash = await bcrypt.hash(password, 10);
-  const newCompany = new companySchema({ email, phone, password: passwordHash });
+  const newCompany = new companySchema({ email, phone, password });
   const companySaved = await newCompany.save();
 
   //(hago que se tomen también los datos completos de los campos siguientes)
