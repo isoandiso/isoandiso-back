@@ -16,10 +16,9 @@ const register = async (req) => {
   if (!employee) {
     return { token:null, employee: null };
   }else{
-    const passwordHash = await bcrypt.hash(password, 10);
     employee.name = name;
     employee.lastname = lastname;
-    employee.password = passwordHash;
+    employee.password = password;
     const updatedEmployee = await employee.save();
     const employeeObject = updatedEmployee.toObject();
     delete employeeObject.password;

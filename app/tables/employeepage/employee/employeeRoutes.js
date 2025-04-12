@@ -14,7 +14,7 @@ router.post('/employee/logout', verifyToken, employeeController.logout);
 router.get('/employee/profile', verifyToken, employeeController.profile);
 router.get('/employee/', verifyToken, employeeController.getAllCompanyEmployees);
 router.get('/employee/:id', verifyToken, employeeController.getCompanyEmployee);
-router.get('/employee/getCompanyEmployeeByEmail/:email', verifyToken, employeeController.getCompanyEmployeeByEmail);
+router.get('/employee/getCompanyEmployeeByEmail/:email', employeeController.getCompanyEmployeeByEmail);
 router.put('/employee/:id', verifyToken, employeeController.updateCompanyEmployee);
 router.delete('/employee/:id', verifyToken, employeeController.deleteCompanyEmployee);
 
