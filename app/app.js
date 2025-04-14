@@ -3,8 +3,10 @@ const mongoose = require('mongoose');
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
-const app = express();
+const path = require('path');
+const fs = require('fs');
 const swaggerUi = require('swagger-ui-express');
+const app = express();
 
 // Conectar a la base de datos
 async function connectToMongoose() {
@@ -27,31 +29,36 @@ app.use(cors({
 }));
 app.use(cookieParser());
 
-// Rutas
-const rutas = [
-  require('./tables/employeepage/activity/activityRoutes'),
-  require('./tables/employeepage/activitycompletiondate/activityCompletionDateRoutes'),
-  require('./tables/employeepage/specificobjective/specificObjectiveRoutes'),
-  require('./tables/employeepage/generalobjective/generalObjectiveRoutes'),
-  require('./tables/employeepage/subcompany/subcompanyRoutes'),
-  require('./tables/employeepage/employee/employeeRoutes'),
-  require('./tables/employeepage/subcompanyemployee/subcompanyEmployeeRoutes'),
-  require('./tables/partnerpage/user/userRoutes'),
-  require('./tables/companypage/companyacquisition/companyAcquisitionRoutes'),
-  require('./tables/companypage/companyarea/companyAreaRoutes'),
-  require('./tables/companypage/company/companyRoutes'),
-  require('./tables/companypage/iso/isoRoutes'),
-  require('./tables/companypage/companycountry/companyCountryRoutes'),
-  require('./tables/employeepage/rol/rolRoutes'),
-  require('./tables/employeepage/employeenationality/employeeNationalityRoutes'),
-  require('./tables/companypage/companysite/companySiteRoutes'),
-  require('./tables/companypage/companyacquisitiontype/companyAcquisitionTypeRoutes'),
-];
-rutas.forEach(route => app.use(route));
+// Función para cargar rutas automáticamente
+function loadAllRoutes(app, baseDir = path.join(__dirname, 'tables')) {
+  function loadRoutes(dir) {
+    fs.readdirSync(dir).forEach(file => {
+      const fullPath = path.join(dir, file);
+      const stat = fs.statSync(fullPath);
 
+      if (stat.isDirectory()) {
+        loadRoutes(fullPath); // Recurse into subdirectories
+      } else if (file.endsWith('Routes.js')) {
+        try {
+          const route = require(fullPath);
+          app.use(route); // Podés usar: app.use('/api', route) si querés prefijo
+          console.log(`Ruta cargada: ${fullPath}`);
+        } catch (err) {
+          console.error(`Error al cargar la ruta: ${fullPath}`, err.message);
+        }
+      }
+    });
+  }
+
+  loadRoutes(baseDir);
+}
+
+// Cargar rutas
+loadAllRoutes(app);
+
+// Swagger
 const swaggerFile = require('./../swagger-output.json');
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Error handler
 app.use((err, req, res, next) => {
