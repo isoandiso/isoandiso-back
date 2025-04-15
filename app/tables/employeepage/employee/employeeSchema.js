@@ -23,6 +23,9 @@ const employeeSchema = new mongoose.Schema({
   },
   password: { type: String, default: null,validate: {
     validator: function(v) {
+      // Permite null
+      if (v === null) return true;
+
       // Mínimo 8
       if (v.length < 8) {
         return false;
@@ -125,7 +128,9 @@ const employeeSchema = new mongoose.Schema({
 // Middleware pre-save para convertir el email a minúsculas y hashear la contraseña
 employeeSchema.pre('save', async function(next) {
   this.email = this.email.toLowerCase();
-  this.password = await bcrypt.hash(this.password, 10);
+  if(this.password){
+    this.password = await bcrypt.hash(this.password, 10);
+  }
   next();
 });
 
