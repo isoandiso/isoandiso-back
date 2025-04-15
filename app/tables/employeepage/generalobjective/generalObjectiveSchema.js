@@ -2,23 +2,7 @@
 const mongoose = require('mongoose');
 
 const generalObjectiveSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  goal: {
-    type: String,
-    required: true,
-  },
-  indicators: {
-    type: String,
-    required: true,
-  },
-  budget: {
-    type: String,
-    required: true,
-  },
-  resources: {
+  description: {
     type: String,
     required: true,
   },

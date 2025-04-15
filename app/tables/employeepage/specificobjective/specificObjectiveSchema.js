@@ -2,11 +2,7 @@
 const mongoose = require('mongoose');
 
 const specificObjectiveSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
-  },
-  managementTool: {
+  description: {
     type: String,
     required: true,
   },

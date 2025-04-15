@@ -1,14 +1,14 @@
 
 const mongoose = require('mongoose');
 
-const activitySchema = new mongoose.Schema({
+const managementToolSchema = new mongoose.Schema({
   description: {
     type: String,
     required: true,
   },
-  managementToolId: {
+  specificObjectiveId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'managementTool',
+    ref: 'specificObjective',
     default: null,
   },
 },
@@ -17,4 +17,4 @@ const activitySchema = new mongoose.Schema({
   }
 );
 
-module.exports = mongoose.model('activity', activitySchema);;
+module.exports = mongoose.model('managementTool', managementToolSchema);;

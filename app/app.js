@@ -34,8 +34,8 @@ app.use(cookieParser());
 // Rutas
 const rutas = [
   require('./tables/employeepage/activity/activityRoutes'),
-  require('./tables/employeepage/activitycompletiondate/activityCompletionDateRoutes'),
   require('./tables/employeepage/specificobjective/specificObjectiveRoutes'),
+  require('./tables/employeepage/managementtool/managementToolRoutes'),
   require('./tables/employeepage/generalobjective/generalObjectiveRoutes'),
   require('./tables/employeepage/subcompany/subcompanyRoutes'),
   require('./tables/employeepage/employee/employeeRoutes'),
