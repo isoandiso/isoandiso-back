@@ -14,7 +14,7 @@ const companySchema = new mongoose.Schema({
       message: `El email no es un email válido!`
     }
   },
-  phone: { type: String, required: true },
+  phone: { type: String, default:null},
   password: { type: String, required: true,validate: {
     validator: function(v) {
       // Mínimo 8
