@@ -1,14 +1,23 @@
 const express = require('express');
 const router = express.Router();
 
-// MIDDLEWARE
+//MIDDLEWARE
 const { verifyToken } = require('../../../token');
 
-// CONTROLADOR
+//CONTROLADOR
 const employeeNationalityController = require('./employeeNationalityController');
 
-// RUTAS
+//RUTAS
+
+//POSTS
 router.post('/employeeNationality', verifyToken, employeeNationalityController.createEmployeeNationality);
+
+//PUTS
+
+//GETS
 router.get('/employeeNationality', verifyToken, employeeNationalityController.getAllEmployeeNationalities);
+
+//DELETES
+
 
 module.exports = router;

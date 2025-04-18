@@ -76,7 +76,7 @@ const getUser = async (req, res) => {
 };
 
 //Actualizar usuario por ID
-const getUserupdateUser = async (req, res) => {
+const updateUser = async (req, res) => {
   try {
     const user = await userService.updateUser(req);
     res.status(200).json(user);
@@ -102,6 +102,6 @@ module.exports = {
   profile,
   getAllUsers,
   getUser,
-  getUserupdateUser,
+  updateUser,
   deleteUser,
 };

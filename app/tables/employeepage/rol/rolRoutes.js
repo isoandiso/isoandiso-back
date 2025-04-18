@@ -8,7 +8,16 @@ const { verifyToken } = require('../../../token');
 const rolController = require('./rolController');
 
 // RUTAS
+
+//POSTS
 router.post('/rol', verifyToken, rolController.createRol);
+
+//PUTS
+
+//GETS
 router.get('/rol', verifyToken, rolController.getAllRoles);
+
+//DELETES
+
 
 module.exports = router;

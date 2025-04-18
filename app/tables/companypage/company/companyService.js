@@ -413,7 +413,7 @@ const addArea = async (req) => {
 
 const createEmployee = async (req) => {
   const employee = new employeeSchema(req.body);
-  employee.save();
+  await employee.save();
   return employee
 };
 

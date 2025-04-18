@@ -108,7 +108,7 @@ const deleteCompany = async (req, res) => {
 //Acualizar contraseña de la empresa por la empresa ID
 const updatePassword = async (req, res) => {
   try {
-    const company = await companyService.updatePassword(req, res);
+    const company = await companyService.updatePassword(req);
     res.status(200).json(company);
   } catch (error) {
     res.status(error.statusCode || 500).json({ message: 'Error actualizando la contraseña de la empresa', error: error.message });
