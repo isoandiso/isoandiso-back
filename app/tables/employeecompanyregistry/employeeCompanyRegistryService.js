@@ -25,7 +25,8 @@ const getCompaniesOfEmployee = async (req) => {
 };
 
 const putCompanyToEmployee = async (req) => {
-  const { employeeEmail, companyId } = req.body;
+  const companyId = req.params.companyId;
+  const employeeEmail = req.params.employeeEmail;
 
   // Obtención del registro referente al empleado
   const employeeCompanyRegistry = await employeeCompanyRegistrySchema.findOne({ employeeEmail: employeeEmail });
