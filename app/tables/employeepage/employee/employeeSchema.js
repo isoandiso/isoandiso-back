@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const employeeSchema = new mongoose.Schema({
   name:{
     type: String,
-    default: null
+    default: null,
   },
   lastname:{
     type: String,
@@ -115,11 +115,6 @@ const employeeSchema = new mongoose.Schema({
   sizePants: {type: Number, required: true, enum: [26, 28, 30, 32, 34, 36, 38, 40, 42, 44]},
   sizePolo: {type: String, required: true, enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']},
   sizeShoe: {type: Number, required: true, enum: [36, 38, 40, 42, 44]},
-  companyIds:[{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'company',
-    required: true
-  }]
 }, 
 { 
   timestamps: true 

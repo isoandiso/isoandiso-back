@@ -8,9 +8,19 @@ const { verifyToken } = require('../../../token');
 const companyCountryController = require('./companyCountryController');
 
 //RUTAS
+
+//POST
 router.post('/companyCountry', verifyToken, companyCountryController.createCompanyCountry);
+
+//PUTS
+
+//GETS
 router.get('/companyCountry', verifyToken, companyCountryController.getAllCompanyCountries);
 router.get('/companyCountry/:id/getisos', verifyToken, companyCountryController.getAllIsosOfCompanyCountry);
 router.get('/companyCountry/withIsos', verifyToken, companyCountryController.getAllCompanyCountriesWithIsos);
+
+
+//DELETES
+
 
 module.exports = router;

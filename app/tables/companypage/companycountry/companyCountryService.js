@@ -18,7 +18,7 @@ const getAllIsosOfCompanyCountry = async (req) => {
   return isos;
 };
 
-const getAllCompanyCountriesWithIsos = async (req) => {
+const getAllCompanyCountriesWithIsos = async () => {
   const companyCountries = await companyCountrySchema.find({ isoIds: { $ne: null } }).populate('isoIds');
   return companyCountries;
 };
