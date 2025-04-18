@@ -13,7 +13,7 @@ const employeeCompanyRegistryController = require('./employeeCompanyRegistryCont
 router.post('/employeeCompanyRegistry/create', verifyToken,employeeCompanyRegistryController.create);
 
 //PUTS
-router.put('/employeeCompanyRegistry/putCompanyToEmployee', verifyToken, employeeCompanyRegistryController.putCompanyToEmployee);
+router.put('/employeeCompanyRegistry/putCompanyToEmployee/:companyId/:employeeEmail', verifyToken, employeeCompanyRegistryController.putCompanyToEmployee);
 
 //GETS
 router.get('/employeeCompanyRegistry/getCompaniesOfEmployee/:employeeEmail', verifyToken, employeeCompanyRegistryController.getCompaniesOfEmployee);
