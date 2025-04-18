@@ -48,7 +48,8 @@ const passtItemSchema = new mongoose.Schema({
     companyAreaId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'companyArea',
-        default: null
+        default: null,
+        required: true,
     },
 
     charge: {
@@ -59,8 +60,25 @@ const passtItemSchema = new mongoose.Schema({
     companyDestinatedAreaId: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'companyArea',
-        default: null
+        default: null,
+        required: true,
     }],
+
+    mounthsForExecute: [{
+        type:Number,
+        min: 1,
+        max:12,
+        required:true
+    }
+    ],
+
+    mounthsExecuted: [{
+        type:Number,
+        min: 1,
+        max:12,
+        required:false
+    }
+    ],
 
 });
 

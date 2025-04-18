@@ -4,7 +4,9 @@ const { Schema } = mongoose;
 const ActivitySchema = new Schema({
   _id: { type: String, required: true },
   description: { type: String, required: true },
-  managementToolId: { type: String, ref: 'ManagementTool', required: true }
+  managementToolId: {type: mongoose.Schema.Types.ObjectId, 
+    ref: 'ManagementTool', 
+    required: true }
 }, { _id: false });
 
 const Activity = mongoose.model('Activity', ActivitySchema);

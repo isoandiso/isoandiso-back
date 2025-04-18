@@ -5,7 +5,7 @@ const objectiveService = require('./objectiveService');
    */
   const  getAllGeneralObjectives = async(req,res)=> {
     try {
-      const objectives = await objectiveService.getAllGeneralObjectives();
+      const objectives = await objectiveService.getallGeneralObje();
       res.status(200).json(objectives);
     } catch (error) {
       res.status(500).json({ message: 'Error retrieving general objectives', error });
@@ -50,6 +50,7 @@ const objectiveService = require('./objectiveService');
       const activities = await objectiveService.getActivitiesByManagementTool(id);
       res.status(200).json(activities);
     } catch (error) {
+      console.log(error);
       res.status(500).json({ message: 'Error retrieving activities', error });
     }
   }

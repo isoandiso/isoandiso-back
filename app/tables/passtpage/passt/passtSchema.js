@@ -13,6 +13,13 @@ const passtSchema = new mongoose.Schema({
       default: null
     },
 
+     items:[{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'passItem',
+        default: null,
+        required: true,
+      }],
+
 });
 
 module.exports = mongoose.model('passt', passtSchema);
