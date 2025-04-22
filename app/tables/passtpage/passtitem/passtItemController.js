@@ -1,15 +1,14 @@
 const {
-    addPasstItem,
-    updatePasstItem,
-    deletePasstItem
-  } = require('./passItemService'); 
+  createPasstItem,
+  updatePasstItem,
+  deletePasstItem
+  } = require('../../passtpage/passt/passtService');
   // Crear un nuevo passtItem
   const createItem = async (req, res) => {
     try {
-      const { passtId } = req.params;
       const itemData = req.body;
   
-      const result = await addPasstItem(passtId, itemData);
+      const result = await   createPasstItem( itemData);
       res.status(201).json(result);
     } catch (error) {
       console.error('Error al crear el item:', error);

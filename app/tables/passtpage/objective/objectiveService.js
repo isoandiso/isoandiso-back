@@ -1,32 +1,13 @@
-const { GeneralObjective } = require('./generalObjectiveSchema');
-const { SpecificObjective } = require('./specificObjectiveSchema');
 const { ManagementTool } = require('./managementToolSchema');
 const { Activity } = require('./activitySchema');
 const mongoose = require('mongoose');
 
-/**
- * Trae todos los objetivos generales
- */
-const getallGeneralObje = async () => {
-  return await GeneralObjective.find();
-};
 
 /**
- * Dado un ID de objetivo general, trae los objetivos específicos asociados
- * @param {string} generalObjectiveId
+ * Trae todas las herramientas de gestion
  */
-const getSpecificObjectivesByGeneral = async (generalObjectiveId) => {
-  return await SpecificObjective.find({
-    generalObjectiveId: new mongoose.Types.ObjectId(generalObjectiveId)
-  }).lean();
-};
-
-/**
- * Dado un ID de objetivo específico, trae las herramientas de gestión asociadas
- * @param {string} specificObjectiveId
- */
-const getManagementToolsBySpecific = async (specificObjectiveId) => {
-  return await ManagementTool.find({ specificObjectiveId: new mongoose.Types.ObjectId(specificObjectiveId)}).lean();
+const getManagementTools = async () => {
+  return await ManagementTool.find().lean();
 };
 
 /**
@@ -38,8 +19,6 @@ const getActivitiesByManagementTool = async (mtoolId) => {
 };
 
 module.exports = {
-  getallGeneralObje,
-  getActivitiesByManagementTool,
-  getManagementToolsBySpecific,
-  getSpecificObjectivesByGeneral
+  getManagementTools,
+  getActivitiesByManagementTool
 };

@@ -8,7 +8,7 @@ const {
 } = require('./passtItemController');
 
 // Crear un nuevo item
-router.post('passt/:passtId/items', createItem);
+router.post('passt/items', createItem);
 
 // Actualizar item
 router.put('passt/items/:itemId', updateItem);

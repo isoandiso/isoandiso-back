@@ -1,77 +1,135 @@
-const passtSchema = require('./passtSchema');
-const passtItem = require('../passtitem/passtItemSchema');
+const Passt = require('./passtSchema');
+const PasstItem = require('../../passtpage/passtitem/passtItemSchema');
+const PasstItemActivity = require('../../passtpage/passtitem/passtItemSchema');
+const CompanyArea = require('../../companypage/companyarea/companyAreaSchema');
 
-const createPasst = async (req) => {
-  const { year, companySiteId, items = [] } = req.body;
+const validateActivityFields = async (activities) => {
+  const allActivities = [];
+  for (const activity of activities || []) {
+    if (!activity.activityId && !activity.activityText)
+      throw new Error('Debe tener activityId o activityText');
+    if (activity.activityId && activity.activityText)
+      throw new Error('Solo debe tener activityId o activityText, no ambos');
 
-  // Validación 1: verificar si ya existe un PASST con mismo año y companySiteId
-  const existingPasst = await passtSchema.findOne({ year, companySiteId });
-  if (existingPasst) {
-    const error = new Error('Ya existe un PASST registrado con el mismo año y y sede.');
-    error.status = 400;
-    throw error;
-  }
+    const key = activity.activityId || activity.activityText;
+    if (allActivities.includes(key))
+      throw new Error('activityId o activityText repetido');
+    allActivities.push(key);
 
-  // Validación 2: evitar ítems duplicados con la misma combinación de objetivos
-  const combinationSet = new Set();
+    const area = await CompanyArea.findById(activity.companyAreaId);
+    if (!area) throw new Error('companyAreaId no válido');
 
-  for (const itemId of items) {
-    const item = await passtItem.findById(itemId);
-    if (!item) {
-      const error = new Error(`No se encontró el passtItem con ID: ${itemId}`);
-      error.status = 400;
-      throw error;
+    for (const destId of activity.companyDestinatedAreaId || []) {
+      const dest = await CompanyArea.findById(destId);
+      if (!dest) throw new Error('companyDestinatedAreaId no válido');
     }
-
-    const comboKey = `${item.generalObjectiveId || 'null'}-${item.specificObjectiveId || 'null'}-${item.managementToolId || 'null'}-${item.activityId || 'null'}`;
-    
-    if (combinationSet.has(comboKey)) {
-      const error = new Error(`Ya existe un ítem con la combinación de objetivos`);
-      error.status = 400;
-      throw error;
-    }
-
-    combinationSet.add(comboKey);
   }
-
-  // Si todo está ok, se crea el nuevo PASST
-  const passt = new passt(req.body);
-  await passt.save();
-  return passt;
 };
 
-const getPassts= async () => {
-    const passts = await passtSchema.find();
-    return passts;
+const createPasst = async (data) => {
+  const exists = await Passt.findOne({ year: data.year, companySiteId: data.companySiteId });
+  if (exists) throw new Error('Ya existe un PASST con el mismo año y companySiteId.');
+
+  for (const item of data.items || []) {
+    await validateActivityFields(item.passtItemActivites);
+  }
+
+  const passt = new Passt(data);
+  return await passt.save();
 };
 
-const getPasst = async (req) => {
-  const passtId = req.params.id;
-  const passt = await passtSchema.findById(passtId)
+const updatePasst = async (id, data) => {
+  const existing = await Passt.findOne({ _id: { $ne: id }, year: data.year, companySiteId: data.companySiteId });
+  if (existing) throw new Error('Ya existe un PASST con el mismo año y companySiteId.');
+
+  for (const item of data.items || []) {
+    await validateActivityFields(item.passtItemActivites);
+  }
+
+  return await Passt.findByIdAndUpdate(id, data, { new: true });
+};
+
+const deletePasst = async (id) => {
+  return await Passt.findByIdAndDelete(id);
+};
+
+const getAllPassts = async () => {
+  return await Passt.find()
     .populate({
       path: 'items',
-      populate: [
-        { path: 'generalObjectiveId' },
-        { path: 'specificObjectiveId' },
-        { path: 'managementToolId' },
-        { path: 'activityId' },
-        { path: 'companyAreaId' },
-        { path: 'companyDestinatedAreaId' }
-      ]
-    })
-    .populate('companySiteId');
-
-  return passt;
+      populate: { path: 'passtItemActivites' }
+    });
 };
 
-const deletePasst = async (req, res) => {
-  const passtId = req.params.id;
-  await passtSchema.findByIdAndDelete(passtId);
+const getPasstById = async (id) => {
+  return await Passt.findById(id)
+    .populate({
+      path: 'items',
+      populate: { path: 'passtItemActivites' }
+    });
+};
+
+//PassItem
+const createPasstItem = async (data) => {
+  const item = new PasstItem(data);
+  return await item.save();
+};
+
+const updatePasstItem = async (id, data) => {
+  return await PasstItem.findByIdAndUpdate(id, data, { new: true });
+};
+
+const deletePasstItem = async (id) => {
+  return await PasstItem.findByIdAndDelete(id);
+};
+
+const getAllPasstItems = async () => {
+  return await PasstItem.find().populate('passtItemActivites');
+};
+
+const getPasstItemById = async (id) => {
+  return await PasstItem.findById(id).populate('passtItemActivites');
+};
+
+//PasstItemActitivity
+
+const createPasstItemActivity = async (data) => {
+  await validateActivityFields([data]);
+  const activity = new PasstItemActivity(data);
+  return await activity.save();
+};
+
+const updatePasstItemActivity = async (id, data) => {
+  await validateActivityFields([data]);
+  return await PasstItemActivity.findByIdAndUpdate(id, data, { new: true });
+};
+
+const deletePasstItemActivity = async (id) => {
+  return await PasstItemActivity.findByIdAndDelete(id);
+};
+
+const getAllPasstItemActivities = async () => {
+  return await PasstItemActivity.find();
+};
+
+const getPasstItemActivityById = async (id) => {
+  return await PasstItemActivity.findById(id);
 };
 
 module.exports = {
   createPasst,
-  getPasst,
-  getPassts,
-  deletePasst
+  updatePasst,
+  deletePasst,
+  getAllPassts,
+  getPasstById,
+  createPasstItem,
+  updatePasstItem,
+  deletePasstItem,
+  getAllPasstItems,
+  getPasstItemById,
+  createPasstItemActivity,
+  updatePasstItemActivity,
+  deletePasstItemActivity,
+  getAllPasstItemActivities,
+  getPasstItemActivityById
 };
