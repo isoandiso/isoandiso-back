@@ -664,7 +664,7 @@
         }
       }
     },
-    "/companyArea/{id}/updateResponsibleEmployee": {
+    "/companyArea/{id}/addResponsibleEmployee": {
       "put": {
 		  "tags": ["CompanyArea"],
         "description": "",
@@ -1800,7 +1800,7 @@
                 }
               }
             },
-            "responsibleEmployeeId": {
+            "responsibleEmployeeIds": {
               "type": "object",
               "properties": {
                 "type": {
