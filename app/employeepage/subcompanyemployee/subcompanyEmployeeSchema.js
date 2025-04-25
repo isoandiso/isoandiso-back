@@ -5,10 +5,6 @@ const subcompanyEmployeeSchema = new mongoose.Schema({
     type: String,
     required: true
   },
-  lastname:{
-    type: String,
-    default: null
-  },
   email: { 
     type: String, 
     required: true, 
@@ -54,10 +50,13 @@ const subcompanyEmployeeSchema = new mongoose.Schema({
   mothers_lastname: {type: String, required: true, maxlength: 20},
   fathers_lastname: {type: String, required: true, maxlength: 20},
   birthDate: {type: Date, required: true},
-  companyAreaId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'companyArea',
-    required: true
+  areaName: {
+    type: String,
+    required:true,
+  },
+  siteName: {
+    type: String,
+    required:true,
   },
   entryDate: {type: Date, required: true},
   province: { type: String, maxlength: 50, required:true, match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/, 'el campo provincia no acepta números.'] },

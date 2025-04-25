@@ -24,6 +24,6 @@ router.get('/employee/:employeeId', verifyToken, employeeController.getCompanyEm
 router.get('/employee/getCompanyEmployeeByEmail/:email', employeeController.getCompanyEmployeeByEmail);
 
 //DELETES
-router.delete('/employee/:employeeId/:companyId', verifyToken, employeeController.deleteCompanyEmployee);
+router.delete('/employee/:employeeId', verifyToken, employeeController.deleteCompanyEmployee);
 
 module.exports = router;
