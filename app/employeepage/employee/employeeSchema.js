@@ -133,6 +133,10 @@ employeeSchema.pre('save', async function(next) {
   next();
 });
 
+
+/////////////////////////////
+
+
 /*
   Al eliminar uno o varios empleados (serán de la misma compañia) eliminamos el "companyId"
   de los empleados del registro de empleados cuyos mails coincidan con los empleados
