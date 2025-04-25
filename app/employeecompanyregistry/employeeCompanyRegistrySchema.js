@@ -14,7 +14,7 @@ const EmployeeCompanyRegistry = new mongoose.Schema({
     }
   },
   companyIds: [{
-    type: String,
+    type: mongoose.Schema.Types.ObjectId,
     required: true,
   }],
 }, 

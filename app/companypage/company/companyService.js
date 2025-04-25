@@ -1,7 +1,6 @@
 const bcrypt = require('bcryptjs');
 const companySchema = require('./companySchema.js');
 const employeeSchema = require('../../employeepage/employee/employeeSchema.js');
-const employeeCompanyRegistrySchema = require('../../employeecompanyregistry/employeeCompanyRegistrySchema.js');
 const { createToken } = require('../../token.js');
 
 //TOKEN
@@ -30,7 +29,7 @@ const register = async (req) => {
     { path: 'areaIds',
       populate: [
         { path: 'isoIds' },
-        { path: 'responsibleEmployeeIds' },
+        { path: 'employeeIds' },
       ]  },
   ])
   .exec();
@@ -61,7 +60,7 @@ const login = async (req) => {
     { path: 'areaIds',
       populate: [
         { path: 'isoIds' },
-        { path: 'responsibleEmployeeIds' },
+        { path: 'employeeIds' },
       ]  },
   ])
   .exec();
@@ -103,7 +102,7 @@ const profile = async (req) => {
     { path: 'areaIds',
       populate: [
         { path: 'isoIds' },
-        { path: 'responsibleEmployeeIds' },
+        { path: 'employeeIds' },
       ]  },
   ])
   .exec();
@@ -134,16 +133,8 @@ const getCompany = async (req) => {
 
 const deleteCompany = async (req) => {
   const companyId = req.params.companyId;
-  
   /*eliminamos la compañia*/
   await companySchema.findByIdAndDelete(companyId);
-
-  /*eliminamos el companyId de todos campos companyIds de todos los empleados del registro de empleados */
-  await employeeCompanyRegistrySchema.updateMany(
-    {},
-    { $pull: { companyIds: companyId } }
-  );
-
 };
 
 const getCompanyCountry = async (req) => {

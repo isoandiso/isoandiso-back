@@ -14,52 +14,115 @@ const companyAreaSchema = new mongoose.Schema({
     ref: 'iso',
     default: null
   }],
-  responsibleEmployeeIds: [{
+  employeeIds: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: 'employee',
     default: null
-  }]
+  }],
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'company',
+    default: null
+  },
 });
 
-// Middleware para ejecutar antes de eliminar uno o varios documentos de companyArea
+/*
+  Al eliminar una o varias áreas (serán de la misma compañia) eliminamos el "companyId"
+  de los empleados del registro de empleados cuyos mails coincidan con los empleados del área
+*/
 companyAreaSchema.pre(['deleteMany', 'deleteOne'], async function(next) {
   try {
     let areasAEliminar;
 
+    //deleteOne
     if (this.model.name === 'companyArea' && this.op === 'deleteOne') {
-      // Para deleteOne, this.getQuery() contiene la condición para encontrar el documento a eliminar
-      const areaAEliminar = await this.model.findOne(this.getQuery()).populate('responsibleEmployeeIds');
+      const areaAEliminar = await this.model.findOne(this.getQuery()).populate('employeeIds');
       if (areaAEliminar) {
         areasAEliminar = [areaAEliminar];
       } else {
-        areasAEliminar = []; // No se encontró el área a eliminar
+        areasAEliminar = [];
       }
-    } else if (this.model.name === 'companyArea' && this.op === 'deleteMany') {
-      // Para deleteMany, this.getQuery() contiene la condición para encontrar los documentos a eliminar
-      areasAEliminar = await this.model.find(this.getQuery()).populate('responsibleEmployeeIds');
+    }
+    //deleteMany
+    else if (this.model.name === 'companyArea' && this.op === 'deleteMany') {
+      areasAEliminar = await this.model.find(this.getQuery()).populate('employeeIds');
     } else {
-      return next(); // Si no es una operación de eliminación en companyArea, salimos
+      return next();
     }
 
     if (areasAEliminar && areasAEliminar.length > 0) {
-      const companyIdParaEliminar = this.model.base.model('company')._id; // Necesitamos el companyId. Asumo que lo tienes disponible de alguna manera en el contexto de la eliminación. Deberás ajustar esto según tu lógica.
-
+      const companyIdAEliminar = areasAEliminar[0].companyId;
       await Promise.all(
         areasAEliminar.map(async (area) => {
-          if (area.responsibleEmployeeIds && area.responsibleEmployeeIds.length > 0) {
-            await Promise.all(
-              area.responsibleEmployeeIds.map(async (employee) => {
-                await this.model.base.model('employeeCompanyRegistry').findOneAndUpdate(
-                  { employeeEmail: employee.email },
-                  { $pull: { companyIds: companyIdParaEliminar } }
-                );
-              })
+          if (area.employeeIds && area.employeeIds.length > 0) {
+            const employeeEmailsToDelete = area.employeeIds.map(employee => employee.email);
+            await this.model.base.model('EmployeeCompanyRegistry').updateMany(
+              { employeeEmail: { $in: employeeEmailsToDelete } },
+              { $pull: { companyIds: companyIdAEliminar } }
             );
           }
         })
       );
     }
 
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+
+/*
+  Al hacer un $pull en el campo employeeIds (es decir quitamos un empleado del área)
+  o al hacer un $psuh (es decir agregamos un empleado al área), eliminamos o agregamos el companyId
+  del EmployeeCompanyRegistry de los empleados
+*/
+companyAreaSchema.pre('findOneAndUpdate', async function(next) {
+  try {
+
+    //Eliminación de un empleado del área, por ende hacemos una operación de quitado a la tabla de registro de empleados
+    if (this._update.$pull && this._update.$pull.employeeIds) {
+      const area = await this.model.findOne(this.getQuery()).populate('employeeIds');
+      if (area) {
+        const employeeIdsToRemove = Array.isArray(this._update.$pull.employeeIds)
+          ? this._update.$pull.employeeIds
+          : [this._update.$pull.employeeIds];
+
+        const employeesToRemove = area.employeeIds.filter(employee =>
+          employeeIdsToRemove.some(id => id.equals(employee._id))
+        );
+
+        if (employeesToRemove.length > 0) {
+          const companyIdToRemove = area.companyId;
+          const employeeEmailsToRemove = employeesToRemove.map(employee => employee.email);
+
+          await this.model.base.model('EmployeeCompanyRegistry').updateMany(
+            { employeeEmail: { $in: employeeEmailsToRemove } },
+            { $pull: { companyIds: companyIdToRemove } }
+          );
+        }
+      }
+    }
+
+    //Agregación de un empleado al área, por ende hacemos una operación de agregado a la tabla de registro de empleados
+    else if (this._update.$push && this._update.$push.employeeIds) {
+      const area = await this.model.findOne(this.getQuery()).populate('employeeIds');
+      if (area) {
+        const employeeIdToAdd = this._update.$push.employeeIds;
+        const employeeToAdd = area.employeeIds.find(employee => employee._id.equals(employeeIdToAdd));
+
+        if (employeeToAdd) {
+          const companyIdToAdd = area.companyId;
+          const employeeEmailToAdd = employeeToAdd.email;
+
+          await this.model.base.model('EmployeeCompanyRegistry').findOneAndUpdate(
+            { employeeEmail: employeeEmailToAdd },
+            { $addToSet: { companyIds: companyIdToAdd } },
+            { new: true, upsert: true }
+          );
+        }
+      }
+    }
     next();
   } catch (error) {
     next(error);

@@ -89,7 +89,14 @@ companySchema.post('save', function(error, doc, next) {
   next(error);
 });
 
-// Eliminamos las tablas asociadas a la compañia que quedarían sueltas sin ya la conexión con la compañia padre
+
+/////////////////////////////
+
+
+/*
+  Al eliminar una o varias compañias eliminamos el/los registros de las 
+  tablas "acquisitionIds","siteIds" y "areaIds" que están asociadas a él
+*/
 
 companySchema.pre('deleteMany', async function(next) {
   try {
@@ -97,7 +104,6 @@ companySchema.pre('deleteMany', async function(next) {
     const acquisitionsToDelete = companiesToDelete.reduce((acc, company) => acc.concat(company.acquisitionIds), []);
     const sitesToDelete = companiesToDelete.reduce((acc, company) => acc.concat(company.siteIds), []);
     const areasToDelete = companiesToDelete.reduce((acc, company) => acc.concat(company.areaIds), []);
-    const countriesToDelete = companiesToDelete.map(company => company.countryId).filter(id => id !== null);
 
     if (acquisitionsToDelete.length > 0) {
       await mongoose.model('companyAcquisition').deleteMany({ _id: { $in: acquisitionsToDelete } });
@@ -107,9 +113,6 @@ companySchema.pre('deleteMany', async function(next) {
     }
     if (areasToDelete.length > 0) {
       await mongoose.model('companyArea').deleteMany({ _id: { $in: areasToDelete } });
-    }
-    if (countriesToDelete.length > 0) {
-      await mongoose.model('companyCountry').deleteMany({ _id: { $in: countriesToDelete } });
     }
 
     next();
@@ -130,9 +133,6 @@ companySchema.pre('deleteOne', async function(next) {
       }
       if (companyToDelete.areaIds && companyToDelete.areaIds.length > 0) {
         await mongoose.model('companyArea').deleteMany({ _id: { $in: companyToDelete.areaIds } });
-      }
-      if (companyToDelete.countryId) {
-        await mongoose.model('companyCountry').deleteOne({ _id: companyToDelete.countryId });
       }
     }
     next();

@@ -6,13 +6,9 @@ const employeeSchema = new mongoose.Schema({
     type: String,
     default: null,
   },
-  lastname:{
+  email: {
     type: String,
-    default: null
-  },
-  email: { 
-    type: String, 
-    required: true, 
+    required: true,
     lowercase: true,
     validate: {
       validator: function(v) {
@@ -47,9 +43,9 @@ const employeeSchema = new mongoose.Schema({
     message: `La contraseña debe tener como minimo 8 caracteres y contener al menos una letra, un número y un símbolo.`
   } },
   dni: {
-    type: String, 
-    required: true, 
-    match:[/^[A-Za-z0-9- ]{5,15}$/, "Dni no válido"], 
+    type: String,
+    required: true,
+    match:[/^[A-Za-z0-9- ]{5,15}$/, "Dni no válido"],
     maxlength: 20
   },
   mothers_lastname: {type: String, required: true, maxlength: 20},
@@ -88,21 +84,21 @@ const employeeSchema = new mongoose.Schema({
     ref: 'nationalityEmployee',
     required: true
   },
-  gender: { 
-    type: String, 
+  gender: {
+    type: String,
     enum: ['Masculino', 'Femenino'],
     required: true
   },
-  civilStatus: { 
-    type: String, 
+  civilStatus: {
+    type: String,
     enum: ['Soltero/a', 'Casado/a','Divorciado/a','Conviviente','Viudo/a'],
     required: true
   },
   personalPhone: {type: String, required: true, match: [/^[+()\-.\s\d]+$/, "Número de teléfono inválido. Solo se permiten dígitos, espacios, paréntesis, guiones y el símbolo '+' para prefijos internacionales."]},
   facialRecognition: {type: String, default: null},
   digitalSignature: {type: String, default: null},
-  status: { 
-    type: String, 
+  status: {
+    type: String,
     enum: ['Activo', 'Inactivo'],
     required: true
   },
@@ -119,9 +115,14 @@ const employeeSchema = new mongoose.Schema({
   sizePants: {type: Number, required: true, enum: [26, 28, 30, 32, 34, 36, 38, 40, 42, 44]},
   sizePolo: {type: String, required: true, enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']},
   sizeShoe: {type: Number, required: true, enum: [36, 38, 40, 42, 44]},
-}, 
-{ 
-  timestamps: true 
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'company',
+    default: null
+  },
+},
+{
+  timestamps: true
 });
 
 // Middleware pre-save para hashear la contraseña
@@ -130,6 +131,47 @@ employeeSchema.pre('save', async function(next) {
     this.password = await bcrypt.hash(this.password, 10);
   }
   next();
+});
+
+/*
+  Al eliminar uno o varios empleados (serán de la misma compañia) eliminamos el "companyId"
+  de los empleados del registro de empleados cuyos mails coincidan con los empleados
+*/
+employeeSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
+  try {
+    const employeeEmail = this.email;
+    const companyIdToRemove = this.companyId;
+
+    if (employeeEmail && companyIdToRemove) {
+      await this.model.base.model('EmployeeCompanyRegistry').findOneAndUpdate(
+        { employeeEmail: employeeEmail },
+        { $pull: { companyIds: companyIdToRemove } }
+      );
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+employeeSchema.pre('deleteMany', { document: false, query: true }, async function(next) {
+  try {
+    const employeesToDelete = await this.model.find(this.getQuery()).select('email companyId');
+    if (employeesToDelete && employeesToDelete.length > 0) {
+      await Promise.all(
+        employeesToDelete.map(async (employee) => {
+          if (employee.email && employee.companyId) {
+            await this.model.base.model('EmployeeCompanyRegistry').findOneAndUpdate(
+              { employeeEmail: employee.email },
+              { $pull: { companyIds: employee.companyId } }
+            );
+          }
+        })
+      );
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = mongoose.model('employee', employeeSchema);

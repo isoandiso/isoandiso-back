@@ -1,5 +1,4 @@
 const employeeSchema = require('./employeeSchema.js');
-const employeeCompanyRegistrySchema = require('../../employeecompanyregistry/employeeCompanyRegistrySchema.js');
 const bcrypt = require('bcryptjs');
 const { createToken } = require('../../token.js');
 
@@ -10,7 +9,7 @@ const { createToken } = require('../../token.js');
  y "contraseña", los cuales se asignarán acá desde la página de trabajadores)
 */
 const register = async (req) => {
-  const { email, name, lastname, password } = req.body;
+  const { email, name, password } = req.body;
 
   //si no se encontró el empleado con dicho email retornamos los datos con null
   const employee = await employeeSchema.findOne({ email });
@@ -18,7 +17,6 @@ const register = async (req) => {
     return { token:null, employee: null };
   }else{
     employee.name = name;
-    employee.lastname = lastname;
     employee.password = password;
     const updatedEmployee = await employee.save();
     const employeeObject = updatedEmployee.toObject();
@@ -99,14 +97,6 @@ const updateCompanyEmployee = async (req) => {
 
 const deleteCompanyEmployee = async (req) => {
   const employeeId = req.params.employeeId;
-  const companyId = req.params.companyId;
-
-  /* eliminamos el companyId del empleado del registro del empleado */
-  const employee = await employeeSchema.findById(employeeId);
-  await employeeCompanyRegistrySchema.findOneAndUpdate(
-    {employeeEmail: employee.email},
-    { $pull: { companyIds:companyId } },
-  );
 
   /*eliminamos el empleado*/
   await employeeSchema.findByIdAndDelete(employeeId);

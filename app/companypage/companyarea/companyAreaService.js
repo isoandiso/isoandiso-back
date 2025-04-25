@@ -1,5 +1,4 @@
 const companyAreaSchema = require('./companyAreaSchema');
-const employeeCompanyRegistrySchema = require('../../employeecompanyregistry/employeeCompanyRegistrySchema');
 
 const createCompanyArea = async (req) => {
   const companyArea = new companyAreaSchema(req.body);
@@ -27,18 +26,6 @@ const getChargeOfHigherHierarchyOfArea = async (req) => {
 
 const deleteCompanyArea = async (req) => {
   const areaId = req.params.areaId;
-  const companyId = req.params.companyId;
-
-  /*eliminamos el companyId dentro del campo companyIds de los empleados del registro de empleados que están dentro del área a eliminar */
-  const area = await companyAreaSchema.findById(areaId).populate('responsibleEmployeeIds');
-  await Promise.all(
-    area.responsibleEmployeeIds.map(async (employee) => {
-      await employeeCompanyRegistrySchema.findOneAndUpdate(
-        { employeeEmail: employee.email },
-        { $pull: { companyIds: companyId } }
-      );
-    })
-  );
 
   /*eliminamos el área */
   await companyAreaSchema.findByIdAndDelete(areaId);
@@ -62,20 +49,11 @@ const deleteIsos = async (req) => {
 const deleteEmployee = async (req) => {
   const areaId = req.params.areaId;
   const employeeId = req.params.employeeId;
-  const employeeEmail = req.params.employeeEmail;
-  const companyId = req.params.companyId;
 
   /*eliminamos el empleado del área*/
   const area = await companyAreaSchema.findByIdAndUpdate(
     areaId,
-    { $pull: { responsibleEmployeeIds: employeeId } },
-    { new: true }
-  );
-
-  /*eliminamos el companyId del empleado del registro de empleados*/
-  await employeeCompanyRegistrySchema.findOneAndUpdate(
-    { employeeEmail: employeeEmail },
-    { $pull: { companyIds:companyId } },
+    { $pull: { employeeIds: employeeId } },
     { new: true }
   );
 
@@ -107,21 +85,12 @@ const addIso = async (req) => {
 const addResponsibleEmployee = async (req) => {
   const areaId = req.params.areaId;
   const employeeId = req.params.employeeId;
-  const employeeEmail = req.params.employeeEmail;
-  const companyId = req.params.companyId;
 
-  /*agegamos al empleado al área*/
+  /*agregamos al empleado al área*/
   const area = await companyAreaSchema.findByIdAndUpdate(
     areaId,
-    { $push: { responsibleEmployeeIds: employeeId } },
+    { $push: { employeeIds: employeeId } },
     { new: true }
-  );
-
-  /*agregamos el companyId al empleado del registro de empleados*/
-  await employeeCompanyRegistrySchema.findOneAndUpdate(
-    { employeeEmail: employeeEmail },
-    { $addToSet: { companyIds: companyId } },
-    { new: true, upsert: true }
   );
 
   return area;
