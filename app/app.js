@@ -4,11 +4,6 @@ const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const app = express();
-const swaggerUi = require('swagger-ui-express');
-
-// Swagger
-const swaggerFile = require('./../swagger-output.json');
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerFile));
 
 // Conectar a la base de datos
 async function connectToMongoose() {
