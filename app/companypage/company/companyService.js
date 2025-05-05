@@ -9,34 +9,9 @@ const register = async (req) => {
   const { email, phone, password } = req.body;
   const newCompany = new companySchema({ email, phone, password });
   const companySaved = await newCompany.save();
-
-  //(hago que se tomen también los datos completos de los campos siguientes)
-  const populatedCompany = await companySchema
-  .findById(companySaved._id)
-  .populate([
-    { path: 'countryId',
-      populate: [
-        { path: 'isoIds' },
-      ]
-     },
-    { path: 'acquisitionIds',
-      populate: [
-        { path: 'isoIds' },
-        { path: 'acquisitionTypeId' },
-      ] 
-    },
-    { path: 'siteIds' },
-    { path: 'areaIds',
-      populate: [
-        { path: 'isoIds' },
-        { path: 'employeeIds' },
-      ]  },
-  ])
-  .exec();
-
-  const companyObject = populatedCompany.toObject();
+  const companyObject = companySaved.toObject();
   delete companyObject.password;
-  const token = createToken({ id: populatedCompany._id });
+  const token = createToken({ id: companyObject._id });
   return { token, company: companyObject};
 };
 
