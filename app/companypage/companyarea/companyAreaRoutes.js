@@ -24,6 +24,6 @@ router.get('/companyArea/getChargeOfHigherHierarchyOfArea/:areaId', verifyToken,
 //DELETES
 router.delete('/companyArea/:areaId', verifyToken, companyAreaController.deleteCompanyArea);
 router.delete('/companyArea/deleteIsos/:areaId', verifyToken, companyAreaController.deleteIsos);
-router.delete('/companyArea/deleteEmploye/:areaId/:employeeId', verifyToken, companyAreaController.deleteEmployee);
+router.delete('/companyArea/deleteEmployee/:areaId/:employeeId', verifyToken, companyAreaController.deleteEmployee);
 
 module.exports = router;
