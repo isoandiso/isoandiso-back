@@ -1,21 +1,51 @@
 require('dotenv').config();
-const mongoose = require('mongoose');
+const { Sequelize } = require('sequelize');
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const app = express();
 
+// Configuración de Sequelize
+const sequelize = new Sequelize(
+  process.env.DB_NAME || 'isoandiso_db',
+  process.env.DB_USER || 'root',
+  process.env.DB_PASSWORD || '',
+  {
+    host: process.env.DB_HOST || 'localhost',
+    port: process.env.DB_PORT || 3306,
+    dialect: 'mysql',
+    logging: false, // Cambiar a console.log para ver las queries SQL
+    pool: {
+      max: 5,
+      min: 0,
+      acquire: 30000,
+      idle: 10000
+    },
+    define: {
+      timestamps: true, // Agrega createdAt y updatedAt automáticamente
+      underscored: true, // Usa snake_case para nombres de columnas
+      freezeTableName: true // Mantiene los nombres de tabla como están
+    }
+  }
+);
+
 // Conectar a la base de datos
-async function connectToMongoose() {
+async function connectToDatabase() {
   try {
-    await mongoose.connect(process.env.URI);
-    console.log('MongoDB connected...');
+    await sequelize.authenticate();
+    console.log('MySQL connected via Sequelize...');
+    
+    // Sincronizar modelos con la base de datos
+    // En desarrollo: force: true (recrea tablas)
+    // En producción: alter: true (modifica tablas existentes)
+    await sequelize.sync({ alter: true });
+    console.log('Database synchronized...');
   } catch (error) {
-    console.error('Error al conectar a MongoDB con Mongoose:', error);
+    console.error('Error al conectar a MySQL con Sequelize:', error);
     process.exit(1);
   }
 }
-connectToMongoose();
+connectToDatabase();
 
 // Middleware
 app.use(express.json());
@@ -63,4 +93,4 @@ app.listen(PORT, () => {
   console.log(`Server listening on port ${PORT}`);
 });
 
-module.exports = app;
+module.exports = { app, sequelize };

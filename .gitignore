@@ -2,4 +2,3 @@ node_modules
 .env
 actions-runner
 .DS_Store
-package-lock.json
