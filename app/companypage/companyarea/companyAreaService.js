@@ -1,99 +1,269 @@
-const companyAreaSchema = require('./companyAreaSchema');
+const CompanyArea = require('./companyAreaSchema');
+const Iso = require('../iso/isoSchema');
+const Employee = require('../../employeepage/employee/employeeSchema');
+const Company = require('../company/companySchema');
+const EmployeeCompanyRegistry = require('../../employeecompanyregistry/employeeCompanyRegistrySchema');
 
-const createCompanyArea = async (req) => {
-  const companyArea = new companyAreaSchema(req.body);
-  await companyArea.save();
-  return companyArea;
-};
-
-const getAllCompanyAreas = async () => {
-    const companyAreas = await companyAreaSchema.find();
-    return companyAreas;
-};
-
-const getCompanyArea = async (req) => {
-  const areaId = req.params.areaId;
-  const companyArea = await companyAreaSchema.findById(areaId);
-  return companyArea;
-};
-
-const getChargeOfHigherHierarchyOfArea = async (req) => {
-  const areaId = req.params.areaId;
-  const companyArea = await companyAreaSchema.findById(areaId);
-  const chargeOfHigherHierarchyOfArea = companyArea.cargos[0];
-  return chargeOfHigherHierarchyOfArea;
-};
-
-const deleteCompanyArea = async (req) => {
-  const areaId = req.params.areaId;
-
-  /*eliminamos el área */
-  await companyAreaSchema.findByIdAndDelete(areaId);
-};
-
-const deleteIsos = async (req) => {
-  const areaId = req.params.areaId;
-  const updatedArea = await companyAreaSchema.findByIdAndUpdate(
-    areaId,
-    { $set: { isoIds: [] } },
-    { new: true }
-  );
-  if (!updatedArea) {
-    const error = new Error("Área de la empresa no encontrada");
-    error.statusCode = 404;
-    throw error;
+// Crear área
+const createCompanyArea = async (req, res) => {
+  try {
+    const { isoIds, employeeIds, ...areaData } = req.body;
+    const companyArea = await CompanyArea.create(areaData);
+    
+    if (Array.isArray(isoIds) && isoIds.length > 0) {
+      await companyArea.setIsos(isoIds);
+    }
+    
+    if (Array.isArray(employeeIds) && employeeIds.length > 0) {
+      await companyArea.setEmployees(employeeIds);
+      
+      // Actualizar EmployeeCompanyRegistry
+      if (companyArea.companyId) {
+        const employees = await Employee.findAll({
+          where: { id: employeeIds }
+        });
+        
+        await Promise.all(
+          employees.map(async (employee) => {
+            let registry = await EmployeeCompanyRegistry.findOne({
+              where: { employeeEmail: employee.email }
+            });
+            
+            if (!registry) {
+              registry = await EmployeeCompanyRegistry.create({
+                employeeEmail: employee.email,
+                companyIds: [companyArea.companyId]
+              });
+            } else {
+              const companyIds = registry.companyIds || [];
+              if (!companyIds.includes(companyArea.companyId)) {
+                companyIds.push(companyArea.companyId);
+                await registry.update({ companyIds });
+              }
+            }
+          })
+        );
+      }
+    }
+    
+    const result = await CompanyArea.findByPk(companyArea.id, {
+      include: [
+        { model: Iso, as: 'isos' },
+        { model: Employee, as: 'employees' },
+        { model: Company, as: 'company' }
+      ]
+    });
+    
+    res.status(201).json(result);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error registrando el área de la empresa', error: error.message });
   }
-  return updatedArea;
 };
 
-const deleteEmployee = async (req) => {
-  const areaId = req.params.areaId;
-  const employeeId = req.params.employeeId;
-
-  /*eliminamos el empleado del área*/
-  const area = await companyAreaSchema.findByIdAndUpdate(
-    areaId,
-    { $pull: { employeeIds: employeeId } },
-    { new: true }
-  );
-
-  return area;
-};
-
-const addIso = async (req) => {
-  const areaId = req.params.areaId;
-  const isoId  = req.params.isoId;
-   // Verificar que isoId esté presente en la solicitud
-   if (!isoId) {
-    const error = new Error("El campo isoId es requerido");
-    error.statusCode = 400;
-    throw error;
+// Obtener todas las áreas
+const getAllCompanyAreas = async (req, res) => {
+  try {
+    const companyAreas = await CompanyArea.findAll({
+      include: [
+        { model: Iso, as: 'isos' },
+        { model: Employee, as: 'employees' },
+        { model: Company, as: 'company' }
+      ]
+    });
+    res.status(200).json(companyAreas);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo todas las áreas de las empresas', error: error.message });
   }
-  const companyArea = await companyAreaSchema.findByIdAndUpdate(
-    areaId,
-    { $addToSet: { isoIds: isoId } },
-    { new: true }
-  );
-  if (!companyArea) {
-    const error = new Error("Área de la empresa no encontrada");
-    error.statusCode = 404;
-    throw error;
-  }
-  return companyArea;
 };
 
-const addResponsibleEmployee = async (req) => {
-  const areaId = req.params.areaId;
-  const employeeId = req.params.employeeId;
+// Obtener área por ID
+const getCompanyArea = async (req, res) => {
+  try {
+    const areaId = req.params.areaId;
+    const companyArea = await CompanyArea.findByPk(areaId, {
+      include: [
+        { model: Iso, as: 'isos' },
+        { model: Employee, as: 'employees' },
+        { model: Company, as: 'company' }
+      ]
+    });
+    
+    if (!companyArea) {
+      return res.status(404).json({ message: 'Área de la empresa no encontrada' });
+    }
+    
+    res.status(200).json(companyArea);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo el área de la empresa', error: error.message });
+  }
+};
 
-  /*agregamos al empleado al área*/
-  const area = await companyAreaSchema.findByIdAndUpdate(
-    areaId,
-    { $push: { employeeIds: employeeId } },
-    { new: true }
-  );
+// Obtener el cargo de mayor jerarquía del área
+const getChargeOfHigherHierarchyOfArea = async (req, res) => {
+  try {
+    const areaId = req.params.areaId;
+    const companyArea = await CompanyArea.findByPk(areaId);
+    
+    if (!companyArea) {
+      return res.status(404).json({ message: 'Área de la empresa no encontrada' });
+    }
+    
+    const charges = companyArea.charges || [];
+    const chargeOfHigherHierarchyOfArea = charges[0] || null;
+    
+    res.status(200).json(chargeOfHigherHierarchyOfArea);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo el cargo de mayor jerarquía del área de la empresa', error: error.message });
+  }
+};
 
-  return area;
+// Eliminar área por ID
+const deleteCompanyArea = async (req, res) => {
+  try {
+    const areaId = req.params.areaId;
+    const companyArea = await CompanyArea.findByPk(areaId);
+    
+    if (!companyArea) {
+      return res.status(404).json({ message: 'Área de la empresa no encontrada' });
+    }
+    
+    await companyArea.destroy();
+    res.status(200).json({ message: 'Área de la empresa eliminada satisfactoriamente' });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error eliminando el área de la empresa', error: error.message });
+  }
+};
+
+// Eliminar las isos del área
+const deleteIsos = async (req, res) => {
+  try {
+    const areaId = req.params.areaId;
+    const companyArea = await CompanyArea.findByPk(areaId);
+    
+    if (!companyArea) {
+      return res.status(404).json({ message: 'Área de la empresa no encontrada' });
+    }
+    
+    await companyArea.setIsos([]);
+    res.status(200).json({ message: 'Las isos del área se eliminaron satisfactoriamente' });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error eliminando las isos del área', error: error.message });
+  }
+};
+
+// Eliminar el trabajador del área
+const deleteEmployee = async (req, res) => {
+  try {
+    const areaId = req.params.areaId;
+    const employeeId = req.params.employeeId;
+    
+    const companyArea = await CompanyArea.findByPk(areaId);
+    if (!companyArea) {
+      return res.status(404).json({ message: 'Área de la empresa no encontrada' });
+    }
+    
+    const employee = await Employee.findByPk(employeeId);
+    if (!employee) {
+      return res.status(404).json({ message: 'Empleado no encontrado' });
+    }
+    
+    await companyArea.removeEmployee(employee);
+    
+    // Actualizar EmployeeCompanyRegistry
+    if (companyArea.companyId) {
+      const registry = await EmployeeCompanyRegistry.findOne({
+        where: { employeeEmail: employee.email }
+      });
+      
+      if (registry && registry.companyIds) {
+        const updatedCompanyIds = registry.companyIds.filter(id => id !== companyArea.companyId);
+        await registry.update({ companyIds: updatedCompanyIds });
+      }
+    }
+    
+    res.status(200).json({ message: 'El trabajador del área se eliminó satisfactoriamente' });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error eliminando el trabajador del área', error: error.message });
+  }
+};
+
+// Agregar isos al área
+const addIso = async (req, res) => {
+  try {
+    const areaId = req.params.areaId;
+    const isoId = req.params.isoId;
+    
+    if (!isoId) {
+      return res.status(400).json({ message: 'El campo isoId es requerido' });
+    }
+    
+    const companyArea = await CompanyArea.findByPk(areaId);
+    if (!companyArea) {
+      return res.status(404).json({ message: 'Área de la empresa no encontrada' });
+    }
+    
+    const iso = await Iso.findByPk(isoId);
+    if (!iso) {
+      return res.status(404).json({ message: 'ISO no encontrada' });
+    }
+    
+    await companyArea.addIso(iso);
+    res.status(200).json({ message: 'ISO agregada al área correctamente' });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error agregando la ISO al área', error: error.message });
+  }
+};
+
+// Actualizar el trabajador responsable del área
+const addResponsibleEmployee = async (req, res) => {
+  try {
+    const areaId = req.params.areaId;
+    const employeeId = req.params.employeeId;
+    
+    const companyArea = await CompanyArea.findByPk(areaId);
+    if (!companyArea) {
+      return res.status(404).json({ message: 'Área de la empresa no encontrada' });
+    }
+    
+    const employee = await Employee.findByPk(employeeId);
+    if (!employee) {
+      return res.status(404).json({ message: 'Empleado no encontrado' });
+    }
+    
+    await companyArea.addEmployee(employee);
+    
+    // Actualizar EmployeeCompanyRegistry
+    if (companyArea.companyId) {
+      let registry = await EmployeeCompanyRegistry.findOne({
+        where: { employeeEmail: employee.email }
+      });
+      
+      if (!registry) {
+        registry = await EmployeeCompanyRegistry.create({
+          employeeEmail: employee.email,
+          companyIds: [companyArea.companyId]
+        });
+      } else {
+        const companyIds = registry.companyIds || [];
+        if (!companyIds.includes(companyArea.companyId)) {
+          companyIds.push(companyArea.companyId);
+          await registry.update({ companyIds });
+        }
+      }
+    }
+    
+    const result = await CompanyArea.findByPk(areaId, {
+      include: [
+        { model: Iso, as: 'isos' },
+        { model: Employee, as: 'employees' },
+        { model: Company, as: 'company' }
+      ]
+    });
+    
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error agregando el trabajador responsable del área', error: error.message });
+  }
 };
 
 module.exports = {

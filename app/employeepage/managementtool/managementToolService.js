@@ -1,30 +1,53 @@
-const managementToolSchema = require('./managementToolSchema');
+const ManagementTool = require('./managementToolSchema');
 
-const createManagementTool = async (req) => {
-  const managementTool = new managementToolSchema(req.body);
-  await managementTool.save();
-  return managementTool;
+// Crear herramienta de gestión
+const createManagementTool = async (req, res) => {
+  try {
+    const managementTool = await ManagementTool.create(req.body);
+    res.status(201).json(managementTool);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error registrando la herramienta de gestión', error: error.message });
+  }
 };
 
-const getAllmanagementTools = async () => {
-    const managementTools = await managementToolSchema.find();
-    return managementTools;
+// Obtener todas las herramientas de gestión
+const getAllManagementTools = async (req, res) => {
+  try {
+    const managementTools = await ManagementTool.findAll();
+    res.status(200).json(managementTools);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo todas las herramientas de gestiones', error: error.message });
+  }
 };
 
-const getManagementTool = async (req) => {
-  const managementToolId = req.params.managementToolId;
-  const managementTool = await managementToolSchema.findById(managementToolId);
-  return managementTool;
+// Obtener herramienta de gestión por ID
+const getManagementTool = async (req, res) => {
+  try {
+    const managementToolId = req.params.managementToolId;
+    const managementTool = await ManagementTool.findByPk(managementToolId);
+    if (!managementTool) {
+      return res.status(404).json({ message: 'Herramienta de gestión no encontrada' });
+    }
+    res.status(200).json(managementTool);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo la herramienta de gestión', error: error.message });
+  }
 };
 
-const deleteManagementTool = async (req) => {
-  const managementToolId = req.params.managementToolId;
-  await managementToolSchema.findByIdAndDelete(managementToolId);
+// Eliminar herramienta de gestión por ID
+const deleteManagementTool = async (req, res) => {
+  try {
+    const managementToolId = req.params.managementToolId;
+    await ManagementTool.destroy({ where: { id: managementToolId } });
+    res.status(200).json({ message: 'Herramienta de gestión eliminada satisfactoriamente' });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error eliminando la herramienta de gestión', error: error.message });
+  }
 };
 
 module.exports = {
   createManagementTool,
-  getAllmanagementTools,
+  getAllManagementTools,
   getManagementTool,
   deleteManagementTool
 };

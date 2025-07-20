@@ -1,30 +1,53 @@
-const ActivitySchema = require('./activitySchema');
+const Activity = require('./activitySchema');
 
-const createActivity = async (req) => {
-  const activity = new ActivitySchema(req.body);
-  await activity.save();
-  return activity;
+// Crear una nueva actividad
+const createActivity = async (req, res) => {
+  try {
+    const activity = await Activity.create(req.body);
+    res.status(201).json(activity);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error creando la actividad', error: error.message });
+  }
 };
 
-const getAllActivities = async () => {
-    const activities = await ActivitySchema.find();
-    return activities;
+// Obtener todas las actividades
+const getAllActivities = async (req, res) => {
+  try {
+    const activities = await Activity.findAll();
+    res.status(200).json(activities);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo todas las actividades', error: error.message });
+  }
 };
 
-const getActivity = async (req) => {
-  const activityId = req.params.activityId;
-  const activity = await ActivitySchema.findById(activityId);
-  return activity;
+// Obtener una actividad por ID
+const getActivity = async (req, res) => {
+  try {
+    const activityId = req.params.activityId;
+    const activity = await Activity.findByPk(activityId);
+    if (!activity) {
+      return res.status(404).json({ message: 'Actividad no encontrada' });
+    }
+    res.status(200).json(activity);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo la actividad', error: error.message });
+  }
 };
 
-const deleteActivity = async (req) => {
-  const activityId = req.params.activityId;
-  await ActivitySchema.findByIdAndDelete(activityId);
+// Eliminar una actividad por ID
+const deleteActivity = async (req, res) => {
+  try {
+    const activityId = req.params.activityId;
+    await Activity.destroy({ where: { id: activityId } });
+    res.status(200).json({ message: 'Actividad eliminada satisfactoriamente' });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error eliminando la actividad', error: error.message });
+  }
 };
 
 module.exports = {
   createActivity,
   getAllActivities,
   getActivity,
-  deleteActivity
+  deleteActivity,
 };

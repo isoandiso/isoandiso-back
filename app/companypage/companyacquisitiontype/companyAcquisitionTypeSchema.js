@@ -1,7 +1,15 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 
-const companyAcquisitionTypeSchema = new mongoose.Schema({
-  name: {type: String,enum: ['Gratuito','Alquiler mensual','Alquiler anual','Compra'], required: true, unique: true},
+const CompanyAcquisitionType = sequelize.define('company_acquisition_type', {
+  name: {
+    type: DataTypes.ENUM('Gratuito', 'Alquiler mensual', 'Alquiler anual', 'Compra'),
+    allowNull: false,
+    unique: true,
+  },
+}, {
+  tableName: 'company_acquisition_type',
+  timestamps: true,
 });
 
-module.exports = mongoose.model('companyAcquisitionType', companyAcquisitionTypeSchema);
+module.exports = CompanyAcquisitionType;

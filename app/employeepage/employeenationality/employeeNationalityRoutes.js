@@ -4,18 +4,18 @@ const router = express.Router();
 //MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-//CONTROLADOR
-const employeeNationalityController = require('./employeeNationalityController');
+//SERVICIO
+const employeeNationalityService = require('./employeeNationalityService');
 
 //RUTAS
 
 //POSTS
-router.post('/employeeNationality', verifyToken, employeeNationalityController.createEmployeeNationality);
+router.post('/employeeNationality', verifyToken, employeeNationalityService.createEmployeeNationality);
 
 //PUTS
 
 //GETS
-router.get('/employeeNationality', verifyToken, employeeNationalityController.getAllEmployeeNationalities);
+router.get('/employeeNationality', verifyToken, employeeNationalityService.getAllEmployeeNationalities);
 
 //DELETES
 

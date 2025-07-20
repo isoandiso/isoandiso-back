@@ -1,25 +1,48 @@
-const generalObjectiveSchema = require('./generalObjectiveSchema');
+const GeneralObjective = require('./generalObjectiveSchema');
 
-const createGeneralObjective = async (req) => {
-  const generalObjective = new generalObjectiveSchema(req.body);
-  await generalObjective.save();
-  return generalObjective;
+// Crear objetivo general
+const createGeneralObjective = async (req, res) => {
+  try {
+    const generalObjective = await GeneralObjective.create(req.body);
+    res.status(201).json(generalObjective);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error registrando el objetivo general', error: error.message });
+  }
 };
 
-const getAllGeneralObjectives = async () => {
-    const generalObjectives = await generalObjectiveSchema.find();
-    return generalObjectives;
+// Obtener todos los objetivos generales
+const getAllGeneralObjectives = async (req, res) => {
+  try {
+    const generalObjectives = await GeneralObjective.findAll();
+    res.status(200).json(generalObjectives);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo todos los objetivos generales', error: error.message });
+  }
 };
 
-const getGeneralObjective = async (req) => {
-  const generalObjectiveId = req.params.generalObjectiveId;
-  const generalObjective = await generalObjectiveSchema.findById(generalObjectiveId);
-  return generalObjective;
+// Obtener objetivo general por ID
+const getGeneralObjective = async (req, res) => {
+  try {
+    const generalObjectiveId = req.params.generalobjectiveid;
+    const generalObjective = await GeneralObjective.findByPk(generalObjectiveId);
+    if (!generalObjective) {
+      return res.status(404).json({ message: 'Objetivo general no encontrado' });
+    }
+    res.status(200).json(generalObjective);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo el objetivo general', error: error.message });
+  }
 };
 
-const deleteGeneralObjective = async (req) => {
-  const generalObjectiveId = req.params.generalObjectiveId;
-  await generalObjectiveSchema.findByIdAndDelete(generalObjectiveId);
+// Eliminar objetivo general por ID
+const deleteGeneralObjective = async (req, res) => {
+  try {
+    const generalObjectiveId = req.params.generalobjectiveid;
+    await GeneralObjective.destroy({ where: { id: generalObjectiveId } });
+    res.status(200).json({ message: 'Objetivo general eliminado satisfactoriamente' });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error eliminando el objetivo general', error: error.message });
+  }
 };
 
 module.exports = {

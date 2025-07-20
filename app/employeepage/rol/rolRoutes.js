@@ -4,18 +4,18 @@ const router = express.Router();
 // MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-// CONTROLADOR
-const rolController = require('./rolController');
+// SERVICIO
+const rolService = require('./rolService');
 
 // RUTAS
 
 //POSTS
-router.post('/rol', verifyToken, rolController.createRol);
+router.post('/rol', verifyToken, rolService.createRol);
 
 //PUTS
 
 //GETS
-router.get('/rol', verifyToken, rolController.getAllRoles);
+router.get('/rol', verifyToken, rolService.getAllRoles);
 
 //DELETES
 

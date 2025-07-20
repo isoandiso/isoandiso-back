@@ -1,17 +1,27 @@
-const companyAcquisitionTypeSchema = require('./companyAcquisitionTypeSchema');
+const CompanyAcquisitionType = require('./companyAcquisitionTypeSchema');
 
-const createCompanyAcquisitionType = async (req) => {
-  const companyAcquisitionType = new companyAcquisitionTypeSchema(req.body);
-  await companyAcquisitionType.save();
-  return companyAcquisitionType;
+// Crear Tipo de Adquisición
+const createCompanyAcquisitionType = async (req, res) => {
+  try {
+    const { name } = req.body;
+    const companyAcquisitionType = await CompanyAcquisitionType.create({ name });
+    res.status(201).json(companyAcquisitionType);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error registrando el tipo de adquisición', error: error.message });
+  }
 };
 
-const getAllCompanyAcquisitionTypes = async () => {
-    const companyAcquisitionTypes = await companyAcquisitionTypeSchema.find();
-    return companyAcquisitionTypes;
+// Obtener todos los Tipos de Adquisición
+const getAllCompanyAcquisitionTypes = async (req, res) => {
+  try {
+    const companyAcquisitionTypes = await CompanyAcquisitionType.findAll();
+    res.status(200).json(companyAcquisitionTypes);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo todos los tipos de adquisiciones', error: error.message });
+  }
 };
 
 module.exports = {
   createCompanyAcquisitionType,
-  getAllCompanyAcquisitionTypes
+  getAllCompanyAcquisitionTypes,
 };

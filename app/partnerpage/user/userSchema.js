@@ -1,74 +1,63 @@
 
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 const bcrypt = require('bcryptjs');
 
-const userSchema = new mongoose.Schema({
+const User = sequelize.define('user', {
   name: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   lastname: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  email: { 
-    type: String, 
-    required: true, 
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true,
-    lowercase: true,
     validate: {
-      validator: function(v) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.endsWith('@gmail.com');
-      },
-      message: `El email debe ser una dirección de Gmail válida`
+      isEmail: true,
+      isGmail(value) {
+        if (!value.endsWith('@gmail.com')) {
+          throw new Error('El email debe ser una dirección de Gmail válida');
+        }
+      }
     }
   },
   password: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     validate: {
-      validator: function(v) {
-        // Mínimo 8
-        if (v.length < 8) {
-          return false;
+      isStrongPassword(value) {
+        if (value.length < 8) {
+          throw new Error('La contraseña debe tener como mínimo 8 caracteres.');
         }
-        // Al menos una letra
-        if (!/[a-zA-Z]/.test(v)) {
-          return false;
+        if (!/[a-zA-Z]/.test(value)) {
+          throw new Error('La contraseña debe contener al menos una letra.');
         }
-        // Al menos un número
-        if (!/[0-9]/.test(v)) {
-          return false;
+        if (!/[0-9]/.test(value)) {
+          throw new Error('La contraseña debe contener al menos un número.');
         }
-        // Al menos un símbolo (caracteres no alfanuméricos ni espacio)
-        if (!/[^a-zA-Z0-9\s]/.test(v)) {
-          return false;
+        if (!/[^a-zA-Z0-9\s]/.test(value)) {
+          throw new Error('La contraseña debe contener al menos un símbolo.');
         }
-        return true;
-      },
-      message: `La contraseña debe tener como minimo 8 caracteres y contener al menos una letra, un número y un símbolo.`
+      }
     }
   }
-},
-{
-  timestamps: true
-}
-);
-
-// Middleware pre-save para hashear la contraseña
-userSchema.pre('save', async function(next) {
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
-
-// Manejo de errores de unicidad
-userSchema.post('save', function(error, doc, next) {
-  if (error.name === 'MongoServerError' && error.code === 11000) {
-    if (error.keyPattern && error.keyPattern.email) {
-      return next(new Error('El email ya existe'));
+}, {
+  tableName: 'user',
+  timestamps: true,
+  hooks: {
+    beforeCreate: async (user) => {
+      user.password = await bcrypt.hash(user.password, 10);
+    },
+    beforeUpdate: async (user) => {
+      if (user.changed('password')) {
+        user.password = await bcrypt.hash(user.password, 10);
+      }
     }
   }
-  next(error);
 });
 
-module.exports = mongoose.model('user', userSchema);;
+module.exports = User;

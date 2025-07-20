@@ -4,21 +4,21 @@ const router = express.Router();
 //MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-//CONTROLADOR
-const specificObjectiveController = require('./specificObjectiveController');
+//SERVICIO
+const specificObjectiveService = require('./specificObjectiveService');
 
 //RUTAS
 
 //POSTS
-router.post('/specificObjective', verifyToken, specificObjectiveController.createSpecificObjective);
+router.post('/specificObjective', verifyToken, specificObjectiveService.createSpecificObjective);
 
 //PUTS
 
 //GETS
-router.get('/specificObjective', verifyToken, specificObjectiveController.getAllSpecificObjectives);
-router.get('/specificObjective/:specificObjectiveId', verifyToken, specificObjectiveController.getSpecificObjective);
+router.get('/specificObjective', verifyToken, specificObjectiveService.getAllSpecificObjectives);
+router.get('/specificObjective/:specificObjectiveId', verifyToken, specificObjectiveService.getSpecificObjective);
 
 //DELETES
-router.delete('/specificObjective/:specificObjectiveId', verifyToken, specificObjectiveController.deleteSpecificObjective);
+router.delete('/specificObjective/:specificObjectiveId', verifyToken, specificObjectiveService.deleteSpecificObjective);
 
 module.exports = router;

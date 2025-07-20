@@ -4,26 +4,26 @@ const router = express.Router();
 //MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-//CONTROLADOR
-const userController = require('./userController');
+//SERVICIO
+const userService = require('./userService');
 
 //RUTAS
 
 //POSTS
-router.post('/user/register', userController.register);
-router.post('/user/login', userController.login);
-router.post('/user/logout', verifyToken, userController.logout);
+router.post('/user/register', userService.register);
+router.post('/user/login', userService.login);
+router.post('/user/logout', verifyToken, userService.logout);
 
 //PUTS
-router.put('/user/:userId', verifyToken, userController.updateUser);
+router.put('/user/:userId', verifyToken, userService.updateUser);
 
 //GETS
-router.get('/user/profile', verifyToken, userController.profile);
-router.get('/user', verifyToken, userController.getAllUsers);
-router.get('/user/:userId', verifyToken, userController.getUser);
+router.get('/user/profile', verifyToken, userService.profile);
+router.get('/user', verifyToken, userService.getAllUsers);
+router.get('/user/:userId', verifyToken, userService.getUser);
 
 //DELETES
-router.delete('/user/:userId', verifyToken, userController.deleteUser);
+router.delete('/user/:userId', verifyToken, userService.deleteUser);
 
 
 module.exports = router;

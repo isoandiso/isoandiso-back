@@ -1,7 +1,15 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 
-const isoSchema = new mongoose.Schema({
-  name: {type: String, required: true, unique: true},
+const Iso = sequelize.define('iso', {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+}, {
+  tableName: 'iso',
+  timestamps: true,
 });
 
-module.exports = mongoose.model('iso', isoSchema);
+module.exports = Iso;

@@ -1,95 +1,143 @@
-const userSchema = require('./userSchema.js');
+const User = require('./userSchema.js');
 const bcrypt = require('bcryptjs');
 const { createToken } = require('../../token.js');
 
-//TOKEN
-
-const register = async (req) => {
-  const { name, lastname, email, password } = req.body;
-  const newUser = new userSchema({ name, lastname, email, password });
-  const userSaved = await newUser.save();
-  const userObject = userSaved.toObject();
-  delete userObject.password;
-  const token = createToken({ id: userObject._id });
-  return { token, user: userObject};
+// Registro de usuario
+const register = async (req, res) => {
+  try {
+    const { name, lastname, email, password } = req.body;
+    const newUser = await User.create({ name, lastname, email, password });
+    const userObject = newUser.toJSON();
+    delete userObject.password;
+    const token = createToken({ id: userObject.id });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'None'
+    });
+    res.status(201).json(userObject);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error registrando al usuario', error: error.message });
+  }
 };
 
-const login = async (req) => {
-  const { email, password } = req.body;
-  const user = await userSchema.findOne({ email });
-  if (!user) {
-    const error = new Error("Algunos de los datos son incorrectos o no está registrado");
-    error.statusCode = 404;
-    throw error;
+// Login de usuario
+const login = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ message: 'Algunos de los datos son incorrectos o no está registrado' });
+    }
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Algunos de los datos son incorrectos o no está registrado' });
+    }
+    const userObject = user.toJSON();
+    delete userObject.password;
+    const token = createToken({ id: userObject.id });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      sameSite: 'None'
+    });
+    res.status(200).json(userObject);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error logeandose con el usuario', error: error.message });
   }
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    const error = new Error("Algunos de los datos son incorrectos o no está registrado");
-    error.statusCode = 400;
-    throw error;
-  }
-  const userObject = user.toObject();
-  delete userObject.password;
-  const token = createToken({ id: userObject._id });
-  return { token, user: userObject };
 };
 
-const profile = async (req) => {
-  const user = await userSchema.findById(req.profile.id);
-  if (!user) {
-    const error = new Error("Usuario no encontrado");
-    error.statusCode = 404;
-    throw error;
+// Logout de usuario
+const logout = async (req, res) => {
+  try {
+    res.clearCookie('token');
+    res.status(200).json({ message: 'Deslogeo del usuario satisfactorio' });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error deslogeandose con el usuario', error: error.message });
   }
-  const userObject = user.toObject();
-  delete userObject.password;
-  return userObject;
 };
 
-//COMMONS
+// Obtener perfil de usuario
+const profile = async (req, res) => {
+  try {
+    const user = await User.findByPk(req.profile.id);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    const userObject = user.toJSON();
+    delete userObject.password;
+    res.status(200).json(userObject);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo el perfil del usuario', error: error.message });
+  }
+};
 
+// Obtener todos los usuarios
 const getAllUsers = async (req, res) => {
-  const users = await userSchema.find();
-  return users
+  try {
+    const users = await User.findAll();
+    res.status(200).json(users);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo todos los usuarios', error: error.message });
+  }
 };
 
+// Obtener usuario por ID
 const getUser = async (req, res) => {
-  const userId = req.params.userId;
-  const user = await userSchema.findById(userId);
-  return user;
+  try {
+    const userId = req.params.userId;
+    const user = await User.findByPk(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error obteniendo el usuario', error: error.message });
+  }
 };
 
-const updateUser = async (req) => {
-  const userId = req.params.userId;
-  const { password, ...user } = req.body;
-  
-  if (password) {
-    user.password = password;
+// Actualizar usuario por ID
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { password, ...userData } = req.body;
+    if (password) {
+      userData.password = password;
+    }
+    const [updatedRows, [updatedUser]] = await User.update(userData, {
+      where: { id: userId },
+      returning: true,
+      individualHooks: true
+    });
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'Usuario no encontrado' });
+    }
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error actualizando el usuario', error: error.message });
   }
-  const userFinded = await userSchema.findByIdAndUpdate(
-    userId,
-    { $set: user },
-    { new: true }
-  );
-  if (!userFinded) {
-    const error = new Error("Usuario no encontrado");
-    error.statusCode = 404;
-    throw error;
-  }
-  return userFinded;
 };
 
+// Eliminar usuario por ID
 const deleteUser = async (req, res) => {
-  const userId = req.params.userId;
-  await userSchema.findByIdAndDelete(userId);
+  try {
+    const userId = req.params.userId;
+    await User.destroy({ where: { id: userId } });
+    res.status(200).json({ message: 'Usuario eliminado satisfactoriamente' });
+  } catch (error) {
+    res.status(error.statusCode || 500).json({ message: 'Error eliminando el usuario', error: error.message });
+  }
 };
 
 module.exports = {
   register,
   login,
+  logout,
   profile,
-  getUser,
   getAllUsers,
+  getUser,
   updateUser,
-  deleteUser
+  deleteUser,
 };

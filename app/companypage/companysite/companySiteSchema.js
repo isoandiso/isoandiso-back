@@ -1,30 +1,54 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 
-const companySiteSchema = new mongoose.Schema({
+const CompanySite = sequelize.define('company_site', {
   name: {
-    type: String,
-    required: true,
-    maxlength: 100,
-    match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/, 'el campo nombre de la sede y direccion solo acepta letras (incluyendo acentos y caracteres latinos especiales), números, espacios (solo entre palabras, no al principio ni al final), puntos (.) y guiones (-)']
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      len: [1, 100],
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/,
+        msg: 'El campo nombre de la sede y dirección solo acepta letras (incluyendo acentos y caracteres latinos especiales), números, espacios, puntos (.) y guiones (-)'
+      }
+    }
   },
   address: {
-    type: String,
-    required: true,
-    maxlength: 200,
-    match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/, 'el campo dirección de la sede y direccion solo acepta letras (incluyendo acentos y caracteres latinos especiales), números, espacios (solo entre palabras, no al principio ni al final), puntos (.) y guiones (-)']
+    type: DataTypes.STRING(200),
+    allowNull: false,
+    validate: {
+      len: [1, 200],
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/,
+        msg: 'El campo dirección de la sede solo acepta letras (incluyendo acentos y caracteres latinos especiales), números, espacios, puntos (.) y guiones (-)'
+      }
+    }
   },
   city: {
-    type: String,
-    required: true,
-    maxlength: 100,
-    match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/, 'el campo ciudad no acepta números.']
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      len: [1, 100],
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/,
+        msg: 'El campo ciudad no acepta números.'
+      }
+    }
   },
   province: {
-    type: String,
-    required: true,
-    maxlength: 100,
-    match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/, 'el campo provincia no acepta números.']
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      len: [1, 100],
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/,
+        msg: 'El campo provincia no acepta números.'
+      }
+    }
   }
+}, {
+  tableName: 'company_site',
+  timestamps: true,
 });
 
-module.exports = mongoose.model('companySite', companySiteSchema);
+module.exports = CompanySite;

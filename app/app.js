@@ -1,43 +1,41 @@
 require('dotenv').config();
-const { Sequelize } = require('sequelize');
 const express = require('express');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
+const sequelize = require('./db');
+const { defineRelations } = require('./table_relations');
 const app = express();
 
-// Configuración de Sequelize
-const sequelize = new Sequelize(
-  process.env.DB_NAME || 'isoandiso_db',
-  process.env.DB_USER || 'root',
-  process.env.DB_PASSWORD || '',
-  {
-    host: process.env.DB_HOST || 'localhost',
-    port: process.env.DB_PORT || 3306,
-    dialect: 'mysql',
-    logging: false, // Cambiar a console.log para ver las queries SQL
-    pool: {
-      max: 5,
-      min: 0,
-      acquire: 30000,
-      idle: 10000
-    },
-    define: {
-      timestamps: true, // Agrega createdAt y updatedAt automáticamente
-      underscored: true, // Usa snake_case para nombres de columnas
-      freezeTableName: true // Mantiene los nombres de tabla como están
-    }
-  }
-);
+// Importar modelos
+require('./companypage/company/companySchema');
+require('./companypage/companycountry/companyCountrySchema');
+require('./companypage/companyacquisition/companyAcquisitionSchema');
+require('./companypage/companyacquisitiontype/companyAcquisitionTypeSchema');
+require('./companypage/companysite/companySiteSchema');
+require('./companypage/companyarea/companyAreaSchema');
+require('./companypage/iso/isoSchema');
+require('./employeepage/employee/employeeSchema');
+require('./employeepage/employeenationality/employeeNationalitySchema');
+require('./employeepage/generalobjective/generalObjectiveSchema');
+require('./employeepage/managementtool/managementToolSchema');
+require('./employeepage/rol/rolSchema');
+require('./employeepage/specificobjective/specificObjectiveSchema');
+require('./employeepage/subcompany/subcompanySchema');
+require('./employeepage/subcompanyemployee/subcompanyEmployeeSchema');
+require('./employeepage/activity/activitySchema');
+require('./partnerpage/user/userSchema');
+require('./employeecompanyregistry/employeeCompanyRegistrySchema');
+
+// Definir relaciones
+defineRelations();
 
 // Conectar a la base de datos
 async function connectToDatabase() {
   try {
     await sequelize.authenticate();
     console.log('MySQL connected via Sequelize...');
-    
-    // Sincronizar modelos con la base de datos
-    // En desarrollo: force: true (recrea tablas)
-    // En producción: alter: true (modifica tablas existentes)
+
+    // Sincronizar modelos
     await sequelize.sync({ alter: true });
     console.log('Database synchronized...');
   } catch (error) {

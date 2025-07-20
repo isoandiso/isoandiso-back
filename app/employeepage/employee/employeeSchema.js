@@ -1,181 +1,268 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 const bcrypt = require('bcryptjs');
+const EmployeeCompanyRegistry = require('../../employeecompanyregistry/employeeCompanyRegistrySchema.js');
 
-const employeeSchema = new mongoose.Schema({
-  name:{
-    type: String,
-    default: null,
+const Employee = sequelize.define('employee', {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
   },
   email: {
-    type: String,
-    required: true,
-    lowercase: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     validate: {
-      validator: function(v) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.endsWith('@gmail.com');
-      },
-      message: `El email debe ser una dirección de Gmail válida`
+      isEmail: true,
+      isGmail(value) {
+        if (!value.endsWith('@gmail.com')) {
+          throw new Error('El email debe ser una dirección de Gmail válida');
+        }
+      }
     }
   },
-  password: { type: String, default: null,validate: {
-    validator: function(v) {
-      // Permite null
-      if (v === null) return true;
-
-      // Mínimo 8
-      if (v.length < 8) {
-        return false;
-      }
-      // Al menos una letra
-      if (!/[a-zA-Z]/.test(v)) {
-        return false;
-      }
-      // Al menos un número
-      if (!/[0-9]/.test(v)) {
-        return false;
-      }
-      // Al menos un símbolo (caracteres no alfanuméricos ni espacio)
-      if (!/[^a-zA-Z0-9\s]/.test(v)) {
-        return false;
-      }
-      return true;
-    },
-    message: `La contraseña debe tener como minimo 8 caracteres y contener al menos una letra, un número y un símbolo.`
-  } },
-  dni: {
-    type: String,
-    required: true,
-    match:[/^[A-Za-z0-9- ]{5,15}$/, "Dni no válido"],
-    maxlength: 20
-  },
-  mothers_lastname: {type: String, required: true, maxlength: 20},
-  fathers_lastname: {type: String, required: true, maxlength: 20},
-  birthDate: {type: Date, required: true},
-  companyAreaId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'companyArea',
-    required: true
-  },
-  entryDate: {type: Date, required: true},
-  contractTerminationDate : {
-    type: Date,
+  password: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
     validate: {
-      validator: function (v) {
-        if(v!==null){
-          return v > this.entryDate;
-        }
-      },
-      message: props => `La fecha de término de contrato (${props.value}) debe ser mayor a la fecha de ingreso (${this.entryDate}).`,
-    },
-    default: null,
+      isStrongPasswordOrNull(value) {
+        if (value === null) return;
+        if (value.length < 8) throw new Error('La contraseña debe tener como mínimo 8 caracteres.');
+        if (!/[a-zA-Z]/.test(value)) throw new Error('La contraseña debe contener al menos una letra.');
+        if (!/[0-9]/.test(value)) throw new Error('La contraseña debe contener al menos un número.');
+        if (!/[^a-zA-Z0-9\s]/.test(value)) throw new Error('La contraseña debe contener al menos un símbolo.');
+      }
+    }
   },
-  areaEntryDate: {type: Date, required: true},
-  province: { type: String, maxlength: 50, required:true, match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/, 'el campo provincia no acepta números.'] },
-  city: { type: String, maxlength: 100, required:true, match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/, 'el campo ciudad no acepta números.'] },
-  address: { type: String, maxlength: 200, required:true, match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/, 'La dirección solo puede contener letras, números, espacios, puntos y guiones.'] },
-  district: { type: String, maxlength: 200, required:true, match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/, 'El distrito solo puede contener letras, números, espacios, puntos y guiones.'] },
+  dni: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[A-Za-z0-9- ]{5,15}$/,
+        msg: 'Dni no válido'
+      }
+    }
+  },
+  mothers_lastname: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+  },
+  fathers_lastname: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+  },
+  birthDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  companyAreaId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'company_area',
+      key: 'id',
+    },
+    field: 'company_area_id',
+  },
+  entryDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  contractTerminationDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
+    validate: {
+      isAfterEntryDate(value) {
+        if (value && this.entryDate && value <= this.entryDate) {
+          throw new Error('La fecha de término de contrato debe ser mayor a la fecha de ingreso.');
+        }
+      }
+    }
+  },
+  areaEntryDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  province: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/,
+        msg: 'El campo provincia no acepta números.'
+      }
+    }
+  },
+  city: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/,
+        msg: 'El campo ciudad no acepta números.'
+      }
+    }
+  },
+  address: {
+    type: DataTypes.STRING(200),
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/,
+        msg: 'La dirección solo puede contener letras, números, espacios, puntos y guiones.'
+      }
+    }
+  },
+  district: {
+    type: DataTypes.STRING(200),
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/,
+        msg: 'El distrito solo puede contener letras, números, espacios, puntos y guiones.'
+      }
+    }
+  },
   corporateEmail: {
-    type: String,
-    required: true,
-    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      isEmail: true,
+    }
   },
   nationalityId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'nationalityEmployee',
-    required: true
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'employee_nationality',
+      key: 'id',
+    },
+    field: 'nationality_id',
   },
   gender: {
-    type: String,
-    enum: ['Masculino', 'Femenino'],
-    required: true
+    type: DataTypes.ENUM('Masculino', 'Femenino'),
+    allowNull: false,
   },
   civilStatus: {
-    type: String,
-    enum: ['Soltero/a', 'Casado/a','Divorciado/a','Conviviente','Viudo/a'],
-    required: true
+    type: DataTypes.ENUM('Soltero/a', 'Casado/a','Divorciado/a','Conviviente','Viudo/a'),
+    allowNull: false,
   },
-  personalPhone: {type: String, required: true, match: [/^[+()\-.\s\d]+$/, "Número de teléfono inválido. Solo se permiten dígitos, espacios, paréntesis, guiones y el símbolo '+' para prefijos internacionales."]},
-  facialRecognition: {type: String, default: null},
-  digitalSignature: {type: String, default: null},
+  personalPhone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[+()\-.\s\d]+$/,
+        msg: 'Número de teléfono inválido. Solo se permiten dígitos, espacios, paréntesis, guiones y el símbolo +.'
+      }
+    }
+  },
+  facialRecognition: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  digitalSignature: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
   status: {
-    type: String,
-    enum: ['Activo', 'Inactivo'],
-    required: true
+    type: DataTypes.ENUM('Activo', 'Inactivo'),
+    allowNull: false,
   },
   employeeSiteId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'companySite',
-    required: true
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'company_site',
+      key: 'id',
+    },
+    field: 'employee_site_id',
   },
   rolId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'rol',
-    required: true
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'rol',
+      key: 'id',
+    },
+    field: 'rol_id',
   },
-  sizePants: {type: Number, required: true, enum: [26, 28, 30, 32, 34, 36, 38, 40, 42, 44]},
-  sizePolo: {type: String, required: true, enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']},
-  sizeShoe: {type: Number, required: true, enum: [36, 38, 40, 42, 44]},
+  sizePants: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      isIn: {
+        args: [[26, 28, 30, 32, 34, 36, 38, 40, 42, 44]],
+        msg: 'Talla de pantalón inválida.'
+      }
+    }
+  },
+  sizePolo: {
+    type: DataTypes.ENUM('XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'),
+    allowNull: false,
+  },
+  sizeShoe: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      isIn: {
+        args: [[36, 38, 40, 42, 44]],
+        msg: 'Talla de zapato inválida.'
+      }
+    }
+  },
   companyId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'company',
-    default: null
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'company',
+      key: 'id',
+    },
+    field: 'company_id',
+    defaultValue: null,
   },
-},
-{
-  timestamps: true
-});
+}, {
+  tableName: 'employee',
+  timestamps: true,
+  hooks: {
+    beforeValidate: (employee) => {
+      if (employee.email) {
+        employee.email = employee.email.toLowerCase();
+      }
+      if (employee.corporateEmail) {
+        employee.corporateEmail = employee.corporateEmail.toLowerCase();
+      }
+    },
+    beforeSave: async (employee) => {
+      if (employee.password && employee.changed('password')) {
+        employee.password = await bcrypt.hash(employee.password, 10);
+      }
+    },
+    beforeDestroy: async (employee) => {
+      try {
+        const employeeEmail = employee.email;
+        const companyIdToRemove = employee.companyId;
 
-// Middleware pre-save para hashear la contraseña
-employeeSchema.pre('save', async function(next) {
-  if(this.password){
-    this.password = await bcrypt.hash(this.password, 10);
-  }
-  next();
-});
-
-
-/////////////////////////////
-
-
-/*
-  Al eliminar uno o varios empleados (serán de la misma compañia) eliminamos el "companyId"
-  de los empleados del registro de empleados cuyos mails coincidan con los empleados
-*/
-employeeSchema.pre('deleteOne', { document: true, query: false }, async function(next) {
-  try {
-    const employeeEmail = this.email;
-    const companyIdToRemove = this.companyId;
-
-    if (employeeEmail && companyIdToRemove) {
-      await this.model.base.model('EmployeeCompanyRegistry').findOneAndUpdate(
-        { employeeEmail: employeeEmail },
-        { $pull: { companyIds: companyIdToRemove } }
-      );
-    }
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
-employeeSchema.pre('deleteMany', { document: false, query: true }, async function(next) {
-  try {
-    const employeesToDelete = await this.model.find(this.getQuery()).select('email companyId');
-    if (employeesToDelete && employeesToDelete.length > 0) {
-      await Promise.all(
-        employeesToDelete.map(async (employee) => {
-          if (employee.email && employee.companyId) {
-            await this.model.base.model('EmployeeCompanyRegistry').findOneAndUpdate(
-              { employeeEmail: employee.email },
-              { $pull: { companyIds: employee.companyId } }
-            );
+        if (employeeEmail && companyIdToRemove) {
+          const registry = await EmployeeCompanyRegistry.findOne({
+            where: { employeeEmail: employeeEmail }
+          });
+          
+          if (registry && registry.companyIds) {
+            // Remover el companyId del array
+            const updatedCompanyIds = registry.companyIds.filter(id => id !== companyIdToRemove);
+            await registry.update({ companyIds: updatedCompanyIds });
           }
-        })
-      );
+        }
+      } catch (error) {
+        console.error('Error en beforeDestroy hook:', error);
+        throw error;
+      }
     }
-    next();
-  } catch (error) {
-    next(error);
   }
 });
 
-module.exports = mongoose.model('employee', employeeSchema);
+module.exports = Employee;

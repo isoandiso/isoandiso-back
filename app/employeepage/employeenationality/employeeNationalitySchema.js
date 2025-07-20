@@ -1,7 +1,15 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 
-const employeeNationalitySchema = new mongoose.Schema({
-  name: {type: String, required: true, unique: true},
+const EmployeeNationality = sequelize.define('employee_nationality', {
+  name: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
+  },
+}, {
+  tableName: 'employee_nationality',
+  timestamps: true,
 });
 
-module.exports = mongoose.model('employeeNationality', employeeNationalitySchema);
+module.exports = EmployeeNationality;

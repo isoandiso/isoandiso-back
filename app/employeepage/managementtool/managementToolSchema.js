@@ -1,19 +1,23 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 
-const managementToolSchema = new mongoose.Schema({
+const ManagementTool = sequelize.define('management_tool', {
   description: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   specificObjectiveId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'specificObjective',
-    default: null,
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'specific_objective',
+      key: 'id',
+    },
+    field: 'specific_objective_id',
   },
-},
-  {
-    timestamps: true
-  }
-);
+}, {
+  tableName: 'management_tool',
+  timestamps: true,
+});
 
-module.exports = mongoose.model('managementTool', managementToolSchema);;
+module.exports = ManagementTool;

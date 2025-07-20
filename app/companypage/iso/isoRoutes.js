@@ -4,22 +4,22 @@ const router = express.Router();
 //MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-//CONTROLADOR
-const isoController = require('./isoController');
+//SERVICIO
+const isoService = require('./isoService');
 
 //RUTAS
 
 //POSTS
-router.post('/iso', verifyToken, isoController.createIso);
+router.post('/iso', verifyToken, isoService.createIso);
 
 //PUTS
 
 //GETS
-router.get('/iso', verifyToken, isoController.getAllIsos);
-router.get('/iso/byNameStartWith', verifyToken, isoController.getIsoByNameStartWith);
-router.get('/iso/:isoId', verifyToken, isoController.getIso);
+router.get('/iso', verifyToken, isoService.getAllIsos);
+router.get('/iso/byNameStartWith', verifyToken, isoService.getIsoByNameStartWith);
+router.get('/iso/:isoId', verifyToken, isoService.getIso);
 
 //DELETES
-router.delete('/iso/:isoId', verifyToken, isoController.deleteIso);
+router.delete('/iso/:isoId', verifyToken, isoService.deleteIso);
 
 module.exports = router;

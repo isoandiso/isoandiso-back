@@ -4,20 +4,20 @@ const router = express.Router();
 // MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-// CONTROLADOR
-const companySiteController = require('./companySiteController');
+// SERVICIO
+const companySiteService = require('./companySiteService');
 
 // RUTAS
 
 //POST
-router.post('/companySite/:companyId', verifyToken, companySiteController.createCompanySite);
+router.post('/companySite/:companyId', verifyToken, companySiteService.createCompanySite);
 
 //PUTS
 
 //GETS
-router.get('/companySite', verifyToken, companySiteController.getAllCompanySites);
+router.get('/companySite', verifyToken, companySiteService.getAllCompanySites);
 
 //DELETES
-router.delete('/companySite/:companySiteId', verifyToken, companySiteController.deleteCompanySite);
+router.delete('/companySite/:companySiteId', verifyToken, companySiteService.deleteCompanySite);
 
 module.exports = router;

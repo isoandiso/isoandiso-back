@@ -4,21 +4,21 @@ const router = express.Router();
 //MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-//CONTROLADOR
-const activityController = require('./activityController');
+//SERVICIO
+const activityService = require('./activityService');
 
 //RUTAS
 
 //POSTS
-router.post('/activity', verifyToken, activityController.createActivity);
+router.post('/activity', verifyToken, activityService.createActivity);
 
 //PUTS
 
 //GETS
-router.get('/activity', verifyToken, activityController.getAllActivities);
-router.get('/activity/:activityId', verifyToken, activityController.getActivity);
+router.get('/activity', verifyToken, activityService.getAllActivities);
+router.get('/activity/:activityId', verifyToken, activityService.getActivity);
 
 //DELETES
-router.delete('/activity/:activityId', verifyToken, activityController.deleteActivity);
+router.delete('/activity/:activityId', verifyToken, activityService.deleteActivity);
 
 module.exports = router;

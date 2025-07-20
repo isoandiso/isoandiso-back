@@ -4,21 +4,21 @@ const router = express.Router();
 //MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-//CONTROLADOR
-const subcompanyEmployeeController = require('./subcompanyEmployeeController');
+//SERVICIO
+const subcompanyEmployeeService = require('./subcompanyEmployeeService');
 
 //RUTAS
 
 //POSTS
-router.post('/subcompanyEmployee', verifyToken, subcompanyEmployeeController.createSubcompanyEmployee);
+router.post('/subcompanyEmployee', verifyToken, subcompanyEmployeeService.createSubcompanyEmployee);
 
 //PUTS
 
 //GETS
-router.get('/subcompanyEmployee', verifyToken, subcompanyEmployeeController.getAllSubcompanyEmployees);
-router.get('/subcompanyEmployee/:subcompanyEmployeeId', verifyToken, subcompanyEmployeeController.getSubcompanyEmployee);
+router.get('/subcompanyEmployee', verifyToken, subcompanyEmployeeService.getAllSubcompanyEmployees);
+router.get('/subcompanyEmployee/:subcompanyEmployeeId', verifyToken, subcompanyEmployeeService.getSubcompanyEmployee);
 
 //DELETES
-router.delete('/subcompanyEmployee/:subcompanyEmployeeId', verifyToken, subcompanyEmployeeController.deleteSubcompanyEmployee);
+router.delete('/subcompanyEmployee/:subcompanyEmployeeId', verifyToken, subcompanyEmployeeService.deleteSubcompanyEmployee);
 
 module.exports = router;

@@ -1,16 +1,23 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 
-const specificObjectiveSchema = new mongoose.Schema({
+const SpecificObjective = sequelize.define('specific_objective', {
   description: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   generalObjectiveId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'generalObjective',
-    default: null,
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'general_objective',
+      key: 'id',
+    },
+    field: 'general_objective_id',
   },
-}
-);
+}, {
+  tableName: 'specific_objective',
+  timestamps: true,
+});
 
-module.exports = mongoose.model('specificObjective', specificObjectiveSchema);;
+module.exports = SpecificObjective;

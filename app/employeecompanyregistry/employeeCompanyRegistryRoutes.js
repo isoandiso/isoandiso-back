@@ -4,8 +4,8 @@ const router = express.Router();
 //MIDDLEWARE
 const { verifyToken } = require('../token');
 
-//CONTROLADOR
-const employeeCompanyRegistryController = require('./employeeCompanyRegistryController');
+//SERVICIO
+const employeeCompanyRegistryService = require('./employeeCompanyRegistryService');
 
 //RUTAS
 
@@ -14,9 +14,8 @@ const employeeCompanyRegistryController = require('./employeeCompanyRegistryCont
 //PUTS
 
 //GETS
-router.get('/employeeCompanyRegistry/getCompaniesOfEmployee/:employeeEmail', verifyToken, employeeCompanyRegistryController.getCompaniesOfEmployee);
+router.get('/employeeCompanyRegistry/getCompaniesOfEmployee/:employeeEmail', verifyToken, employeeCompanyRegistryService.getCompaniesOfEmployee);
 
 //DELETES
-
 
 module.exports = router;

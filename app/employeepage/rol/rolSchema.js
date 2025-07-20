@@ -1,11 +1,14 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 
-const rolSchema = new mongoose.Schema({
+const Rol = sequelize.define('rol', {
   name: {
-    type: String,
-    enum: ['Jefe', 'Asistente','Supervisor','Colaborador'],
-    required: true
-  }
+    type: DataTypes.ENUM('Jefe', 'Asistente', 'Supervisor', 'Colaborador'),
+    allowNull: false,
+  },
+}, {
+  tableName: 'rol',
+  timestamps: true,
 });
 
-module.exports = mongoose.model('rol', rolSchema);
+module.exports = Rol;

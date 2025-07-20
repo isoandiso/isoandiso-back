@@ -4,22 +4,22 @@ const router = express.Router();
 //MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-//CONTROLADOR
-const managementToolController = require('./managementToolController');
+//SERVICIO
+const managementToolService = require('./managementToolService');
 
 //RUTAS
 
 //POSTS
-router.post('/managementTool', verifyToken, managementToolController.createManagementTool);
+router.post('/managementTool', verifyToken, managementToolService.createManagementTool);
 
 //PUTS
 
 //GETS
-router.get('/managementTool', verifyToken, managementToolController.getAllManagementTools);
-router.get('/managementTool/:managementToolId', verifyToken, managementToolController.getManagementTool);
+router.get('/managementTool', verifyToken, managementToolService.getAllManagementTools);
+router.get('/managementTool/:managementToolId', verifyToken, managementToolService.getManagementTool);
 
 //DELETES
-router.delete('/managementTool/:managementToolId', verifyToken, managementToolController.deleteManagementTool);
+router.delete('/managementTool/:managementToolId', verifyToken, managementToolService.deleteManagementTool);
 
 
 module.exports = router;

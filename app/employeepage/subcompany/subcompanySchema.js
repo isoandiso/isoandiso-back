@@ -1,24 +1,46 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 
-const subcompanySchema = new mongoose.Schema({
-  ruc: { type: String, required: true },
-  socialReason: { type: String, required: true },
-  economicActivity: { type: String, required: true },
-  economicSector: { type: String, required: true },
-  companySize: { type: String, enum: ['Micro', 'Pequeña', 'Mediana', 'Grande'], required: true },
-  entryDate: { type: Date, required: true },
-  contractTerminationDate: {
-    type: Date,
-    validate: {
-      validator: function (v) {
-        if(v!==null){
-          return v > this.entryDate;
-        }
-      },
-      message: props => `La fecha de término de contrato (${props.value}) debe ser mayor a la fecha de ingreso (${this.entryDate}).`,
-    },
-    default: null,
+const Subcompany = sequelize.define('subcompany', {
+  ruc: {
+    type: DataTypes.STRING,
+    allowNull: false,
   },
+  socialReason: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  economicActivity: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  economicSector: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  companySize: {
+    type: DataTypes.ENUM('Micro', 'Pequeña', 'Mediana', 'Grande'),
+    allowNull: false,
+  },
+  entryDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  contractTerminationDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    validate: {
+      isAfterEntryDate(value) {
+        if (value && this.entryDate && value <= this.entryDate) {
+          throw new Error('La fecha de término de contrato debe ser mayor a la fecha de ingreso.');
+        }
+      }
+    },
+    defaultValue: null,
+  },
+}, {
+  tableName: 'subcompany',
+  timestamps: true,
 });
 
-module.exports = mongoose.model('subcompany', subcompanySchema);
+module.exports = Subcompany;

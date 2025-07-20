@@ -1,60 +1,74 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
+const CompanyAcquisitionType = require('../companyacquisitiontype/companyAcquisitionTypeSchema');
 
-const companyAcquisitionSchema = new mongoose.Schema({
-    isoIds:[{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'iso',
-      required: true
-    }],
-    acquisitionTypeId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'companyAcquisitionType',
-      required: true
+const CompanyAcquisition = sequelize.define('companyAcquisition', {
+  acquisitionDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: DataTypes.NOW
+  },
+  expirationDate: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null
+  },
+  invoiceLink: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    defaultValue: null,
+    unique: true
+  },
+  acquisitionTypeId: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    references: {
+      model: 'company_acquisition_type',
+      key: 'id',
     },
-    acquisitionDate: { type: Date, required: true, default: Date.now },
-    expirationDate: { type: Date, default: null },
-    invoiceLink: {type: String, default: null}
-});
-
-// Permitir repetir el valor null en los siguientes campos unique
-companyAcquisitionSchema.index({ invoiceLink: 1 }, { unique: true, partialFilterExpression: { invoiceLink: { $ne: null } } });
-
-//Pre-save hook para calcular expirationDate
-companyAcquisitionSchema.pre('save', async function (next) {
-  try {
-      const acquisitionTypeId = await mongoose.model('companyAcquisitionType').findById(this.acquisitionTypeId);
-      if (!acquisitionTypeId) {
-          throw new Error('Tipo de adquisición no encontrado');
-      }
-
-      const acquisitionTypeName = acquisitionTypeId.name;
-
-      if (acquisitionTypeName !== 'Compra') {
-          let aditionalMonths;
-          switch (acquisitionTypeName) {
-            case "Gratuito":
-              aditionalMonths = 2;
-              break;
-            case "Alquiler mensual":
-              aditionalMonths = 1;
-              break;
-            case "Alquiler anual":
-              aditionalMonths = 12;
-              break;
-            default:
-              aditionalMonths = 0;
+    field: 'acquisition_type_id',
+  }
+}, {
+  tableName: 'company_acquisition',
+  timestamps: true,
+  hooks: {
+    beforeSave: async (acquisition) => {
+      try {
+        if (acquisition.changed('acquisitionTypeId') || acquisition.changed('acquisitionDate')) {
+          const acquisitionType = await CompanyAcquisitionType.findByPk(acquisition.acquisitionTypeId);
+          if (!acquisitionType) {
+            throw new Error('Tipo de adquisición no encontrado');
           }
-          if(aditionalMonths !=0){
-            const expirationDate = new Date(this.acquisitionDate);
-            expirationDate.setMonth(expirationDate.getMonth() + aditionalMonths);
-            this.expirationDate = expirationDate;
+
+          const acquisitionTypeName = acquisitionType.name;
+
+          if (acquisitionTypeName !== 'Compra') {
+            let additionalMonths;
+            switch (acquisitionTypeName) {
+              case "Gratuito":
+                additionalMonths = 2;
+                break;
+              case "Alquiler mensual":
+                additionalMonths = 1;
+                break;
+              case "Alquiler anual":
+                additionalMonths = 12;
+                break;
+              default:
+                additionalMonths = 0;
+            }
+            if (additionalMonths !== 0) {
+              const expirationDate = new Date(acquisition.acquisitionDate);
+              expirationDate.setMonth(expirationDate.getMonth() + additionalMonths);
+              acquisition.expirationDate = expirationDate;
+            }
           }
+        }
+      } catch (error) {
+        throw error;
       }
-      next();
-  } catch (err) {
-      next(err);
+    }
   }
 });
 
-
-module.exports = mongoose.model('companyAcquisition', companyAcquisitionSchema);
+module.exports = CompanyAcquisition;

@@ -1,25 +1,42 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../db');
 
-const EmployeeCompanyRegistry = new mongoose.Schema({
-  employeeEmail: { 
-    type: String, 
-    required: true, 
-    unique:true,
-    lowercase: true,
+const EmployeeCompanyRegistry = sequelize.define('employeeCompanyRegistry', {
+  employeeEmail: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    unique: true,
     validate: {
-      validator: function(v) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.endsWith('@gmail.com');
-      },
-      message: `El email debe ser una dirección de Gmail válida`
+      isEmail: true,
+      isGmail(value) {
+        if (!value.endsWith('@gmail.com')) {
+          throw new Error('El email debe ser una dirección de Gmail válida');
+        }
+      }
     }
   },
-  companyIds: [{
-    type: mongoose.Schema.Types.ObjectId,
-    required: true,
-  }],
-}, 
-{ 
-  timestamps: true 
+  companyIds: {
+    type: DataTypes.JSON,
+    allowNull: false,
+    defaultValue: [],
+    validate: {
+      isArray(value) {
+        if (!Array.isArray(value)) {
+          throw new Error('companyIds debe ser un array');
+        }
+      }
+    }
+  }
+}, {
+  tableName: 'employee_company_registry',
+  timestamps: true,
+  hooks: {
+    beforeValidate: (registry) => {
+      if (registry.employeeEmail) {
+        registry.employeeEmail = registry.employeeEmail.toLowerCase();
+      }
+    }
+  }
 });
 
-module.exports = mongoose.model('employeeCompanyRegistry', EmployeeCompanyRegistry);
+module.exports = EmployeeCompanyRegistry;

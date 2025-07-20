@@ -1,101 +1,192 @@
-const mongoose = require('mongoose');
+const { DataTypes } = require('sequelize');
+const sequelize = require('../../db');
 
-const subcompanyEmployeeSchema = new mongoose.Schema({
+const SubcompanyEmployee = sequelize.define('subcompany_employee', {
   name: {
-    type: String,
-    required: true
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  email: { 
-    type: String, 
-    required: true, 
-    lowercase: true,
+  email: {
+    type: DataTypes.STRING,
+    allowNull: false,
     validate: {
-      validator: function(v) {
-        return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) && v.endsWith('@gmail.com');
-      },
-      message: `El email debe ser una dirección de Gmail válida`
+      isEmail: true,
+      isGmail(value) {
+        if (!value.endsWith('@gmail.com')) {
+          throw new Error('El email debe ser una dirección de Gmail válida');
+        }
+      }
     }
   },
-  password: { type: String, default: null,validate: {
-    validator: function(v) {
-      // Permite null
-      if (v === null) return true;
-
-      // Mínimo 8
-      if (v.length < 8) {
-        return false;
+  password: {
+    type: DataTypes.STRING,
+    allowNull: true,
+    validate: {
+      isStrongPasswordOrNull(value) {
+        if (value === null) return;
+        if (value.length < 8) throw new Error('La contraseña debe tener como mínimo 8 caracteres.');
+        if (!/[a-zA-Z]/.test(value)) throw new Error('La contraseña debe contener al menos una letra.');
+        if (!/[0-9]/.test(value)) throw new Error('La contraseña debe contener al menos un número.');
+        if (!/[^a-zA-Z0-9\s]/.test(value)) throw new Error('La contraseña debe contener al menos un símbolo.');
       }
-      // Al menos una letra
-      if (!/[a-zA-Z]/.test(v)) {
-        return false;
-      }
-      // Al menos un número
-      if (!/[0-9]/.test(v)) {
-        return false;
-      }
-      // Al menos un símbolo (caracteres no alfanuméricos ni espacio)
-      if (!/[^a-zA-Z0-9\s]/.test(v)) {
-        return false;
-      }
-      return true;
-    },
-    message: `La contraseña debe tener como minimo 8 caracteres y contener al menos una letra, un número y un símbolo.`
-  } },
-  dni: {
-    type: String, 
-    required: true, 
-    match:[/^[A-Za-z0-9- ]{5,15}$/, "Dni no válido"], 
-    maxlength: 20
+    }
   },
-  mothers_lastname: {type: String, required: true, maxlength: 20},
-  fathers_lastname: {type: String, required: true, maxlength: 20},
-  birthDate: {type: Date, required: true},
+  dni: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[A-Za-z0-9- ]{5,15}$/,
+        msg: 'Dni no válido'
+      }
+    }
+  },
+  mothers_lastname: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+  },
+  fathers_lastname: {
+    type: DataTypes.STRING(20),
+    allowNull: false,
+  },
+  birthDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
   areaName: {
-    type: String,
-    required:true,
+    type: DataTypes.STRING,
+    allowNull: false,
   },
   siteName: {
-    type: String,
-    required:true,
+    type: DataTypes.STRING,
+    allowNull: false,
   },
-  entryDate: {type: Date, required: true},
-  province: { type: String, maxlength: 50, required:true, match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/, 'el campo provincia no acepta números.'] },
-  city: { type: String, maxlength: 100, required:true, match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/, 'el campo ciudad no acepta números.'] },
-  address: { type: String, maxlength: 200, required:true, match: [/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/, 'La dirección solo puede contener letras, números, espacios, puntos y guiones.'] },
-  district: {type: String, required: true},
+  entryDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  province: {
+    type: DataTypes.STRING(50),
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/,
+        msg: 'El campo provincia no acepta números.'
+      }
+    }
+  },
+  city: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s.-]+$/,
+        msg: 'El campo ciudad no acepta números.'
+      }
+    }
+  },
+  address: {
+    type: DataTypes.STRING(200),
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ0-9\s.-]+$/,
+        msg: 'La dirección solo puede contener letras, números, espacios, puntos y guiones.'
+      }
+    }
+  },
+  district: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
   corporateEmail: {
-    type: String,
-    required: true,
+    type: DataTypes.STRING,
+    allowNull: false,
     unique: true,
-    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    validate: {
+      isEmail: true,
+    }
   },
   nationalityId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'nationalityEmployee',
-    default: null
+    type: DataTypes.INTEGER,
+    allowNull: true,
+    references: {
+      model: 'employee_nationality',
+      key: 'id',
+    },
+    field: 'nationality_id',
   },
-  gender: { 
-    type: String, 
-    enum: ['Masculino', 'Femenino'],
-    required: true
+  gender: {
+    type: DataTypes.ENUM('Masculino', 'Femenino'),
+    allowNull: false,
   },
-  civilStatus: { 
-    type: String, 
-    enum: ['Soltero/a', 'Casado/a','Divorciado/a','Conviviente','Viudo/a'],
-    required: true
+  civilStatus: {
+    type: DataTypes.ENUM('Soltero/a', 'Casado/a','Divorciado/a','Conviviente','Viudo/a'),
+    allowNull: false,
   },
-  personalPhone: {type: String, required: true, match: [/^[+()\-.\s\d]+$/, "Número de teléfono inválido. Solo se permiten dígitos, espacios, paréntesis, guiones y el símbolo '+' para prefijos internacionales."]},
-  facialRecognition: {type: String, default: null},
-  digitalSignature: {type: String, default: null},
-  status: { 
-    type: String, 
-    enum: ['Activo', 'Inactivo'],
-    required: true
+  personalPhone: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    validate: {
+      is: {
+        args: /^[+()\-.\s\d]+$/,
+        msg: 'Número de teléfono inválido. Solo se permiten dígitos, espacios, paréntesis, guiones y el símbolo +.'
+      }
+    }
   },
-  employeeSite: {type: String, required: true},
-  sizePants: {type: Number, required: true, enum: [26, 28, 30, 32, 34, 36, 38, 40, 42, 44]},
-  sizePolo: {type: String, required: true, enum: ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL']},
-  sizeShoe: {type: Number, required: true, enum: [36, 38, 40, 42, 44]},
+  facialRecognition: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  digitalSignature: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  status: {
+    type: DataTypes.ENUM('Activo', 'Inactivo'),
+    allowNull: false,
+  },
+  employeeSite: {
+    type: DataTypes.STRING,
+    allowNull: false,
+  },
+  sizePants: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      isIn: {
+        args: [[26, 28, 30, 32, 34, 36, 38, 40, 42, 44]],
+        msg: 'Talla de pantalón inválida.'
+      }
+    }
+  },
+  sizePolo: {
+    type: DataTypes.ENUM('XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'),
+    allowNull: false,
+  },
+  sizeShoe: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+    validate: {
+      isIn: {
+        args: [[36, 38, 40, 42, 44]],
+        msg: 'Talla de zapato inválida.'
+      }
+    }
+  },
+}, {
+  tableName: 'subcompany_employee',
+  timestamps: true,
+  hooks: {
+    beforeValidate: (employee) => {
+      if (employee.email) {
+        employee.email = employee.email.toLowerCase();
+      }
+      if (employee.corporateEmail) {
+        employee.corporateEmail = employee.corporateEmail.toLowerCase();
+      }
+    }
+  }
 });
 
-module.exports = mongoose.model('subcompanyEmployee', subcompanyEmployeeSchema);
+module.exports = SubcompanyEmployee;

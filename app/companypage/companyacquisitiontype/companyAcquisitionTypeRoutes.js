@@ -4,20 +4,19 @@ const router = express.Router();
 // MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-// CONTROLADOR
-const companyAcquisitionTypeController = require('./companyAcquisitionTypeController');
+// SERVICIO
+const companyAcquisitionTypeService = require('./companyAcquisitionTypeService');
 
 // RUTAS
 
 //POSTS
-router.post('/companyAcquisitionType', verifyToken, companyAcquisitionTypeController.createCompanyAcquisitionType);
+router.post('/companyAcquisitionType', verifyToken, companyAcquisitionTypeService.createCompanyAcquisitionType);
 
 //PUTS
 
 //GETS
-router.get('/companyAcquisitionType', verifyToken, companyAcquisitionTypeController.getAllCompanyAcquisitionTypes);
+router.get('/companyAcquisitionType', verifyToken, companyAcquisitionTypeService.getAllCompanyAcquisitionTypes);
 
 //DELETES
-
 
 module.exports = router;

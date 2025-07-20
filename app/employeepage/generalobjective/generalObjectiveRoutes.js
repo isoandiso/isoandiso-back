@@ -4,21 +4,21 @@ const router = express.Router();
 //MIDDLEWARE
 const { verifyToken } = require('../../token');
 
-//CONTROLADOR
-const generalObjectiveController = require('./generalObjectiveController');
+//SERVICIO
+const generalObjectiveService = require('./generalObjectiveService');
 
 //RUTAS
 
 //POSTS
-router.post('/generalObjective', verifyToken, generalObjectiveController.createGeneralObjective);
+router.post('/generalobjective', verifyToken, generalObjectiveService.createGeneralObjective);
 
 //PUTS
 
 //GETS
-router.get('/generalObjective', verifyToken, generalObjectiveController.getAllGeneralObjectives);
-router.get('/generalObjective/:generalObjectiveId', verifyToken, generalObjectiveController.getGeneralObjective);
+router.get('/generalobjective', verifyToken, generalObjectiveService.getAllGeneralObjectives);
+router.get('/generalobjective/:generalobjectiveid', verifyToken, generalObjectiveService.getGeneralObjective);
 
 //DELETES
-router.delete('/generalObjective/:generalObjectiveId', verifyToken, generalObjectiveController.deleteGeneralObjective);
+router.delete('/generalobjective/:generalobjectiveid', verifyToken, generalObjectiveService.deleteGeneralObjective);
 
 module.exports = router;
