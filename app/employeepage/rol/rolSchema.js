@@ -8,7 +8,6 @@ const Rol = sequelize.define('rol', {
   },
 }, {
   tableName: 'rol',
-  timestamps: true,
 });
 
 module.exports = Rol;

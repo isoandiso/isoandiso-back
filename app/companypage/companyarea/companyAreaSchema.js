@@ -31,7 +31,6 @@ const CompanyArea = sequelize.define('companyArea', {
   }
 }, {
   tableName: 'company_area',
-  timestamps: true,
   hooks: {
     /*
       Al eliminar una o varias áreas (serán de la misma compañia) eliminamos el "companyId"

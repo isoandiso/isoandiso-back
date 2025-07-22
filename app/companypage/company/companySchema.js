@@ -123,7 +123,6 @@ const Company = sequelize.define('company', {
   }
 }, {
   tableName: 'company',
-  timestamps: true,
   indexes: [
     {
       unique: true,

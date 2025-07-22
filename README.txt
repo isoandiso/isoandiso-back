@@ -23,6 +23,9 @@ GUÍA DE INSTALACIÓN Y PUESTA EN MARCHA DEL PROYECTO
     Luego ejecutar lo siguiente para crear la base de datos:
     create database isoandiso_db;  
 
+    Luego posicionarse en la base de datos:
+    use isoandiso_db;
+
 
 4)_ En otra terminal correr "npm i" y luego "npm run dev"
 
@@ -33,10 +36,11 @@ GUÍA DE INSTALACIÓN Y PUESTA EN MARCHA DEL PROYECTO
     Database synchronized..."
 
 
-5)_ Instertar datos de prueba en las tablas de la base de datos corriendo:
+5)_ Volver a la terminar donde tenemos abierto MySQL en donde por último corrimos el comando "use isoandiso_db;" y ejecutar el script siguiente para guardar datos que nos serviran para usar con el proyecto front-end de registro de empresas corriendo el comando:
 
-    node app/test_insert_data.js
+    source app/script.sql;
 
+    (luego verificar que no haya habido ningún error en las inserciones, comprobar que se guardaron los datos en la base de datos)
 
 
 MODULOS Y RELACIONES

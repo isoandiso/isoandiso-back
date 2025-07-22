@@ -17,7 +17,6 @@ const ManagementTool = sequelize.define('management_tool', {
   },
 }, {
   tableName: 'management_tool',
-  timestamps: true,
 });
 
 module.exports = ManagementTool;

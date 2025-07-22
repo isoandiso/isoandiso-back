@@ -226,7 +226,6 @@ const Employee = sequelize.define('employee', {
   },
 }, {
   tableName: 'employee',
-  timestamps: true,
   hooks: {
     beforeValidate: (employee) => {
       if (employee.email) {

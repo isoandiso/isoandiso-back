@@ -9,7 +9,6 @@ const CompanyAcquisitionType = sequelize.define('company_acquisition_type', {
   },
 }, {
   tableName: 'company_acquisition_type',
-  timestamps: true,
 });
 
 module.exports = CompanyAcquisitionType;

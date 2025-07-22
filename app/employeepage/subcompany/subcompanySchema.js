@@ -40,7 +40,6 @@ const Subcompany = sequelize.define('subcompany', {
   },
 }, {
   tableName: 'subcompany',
-  timestamps: true,
 });
 
 module.exports = Subcompany;

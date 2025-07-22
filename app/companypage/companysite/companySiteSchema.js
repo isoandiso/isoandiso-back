@@ -48,7 +48,6 @@ const CompanySite = sequelize.define('company_site', {
   }
 }, {
   tableName: 'company_site',
-  timestamps: true,
 });
 
 module.exports = CompanySite;

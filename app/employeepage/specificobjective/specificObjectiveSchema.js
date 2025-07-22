@@ -17,7 +17,6 @@ const SpecificObjective = sequelize.define('specific_objective', {
   },
 }, {
   tableName: 'specific_objective',
-  timestamps: true,
 });
 
 module.exports = SpecificObjective;

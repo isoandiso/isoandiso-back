@@ -18,7 +18,6 @@ const sequelize = new Sequelize(
       idle: 10000
     },
     define: {
-      timestamps: true, // agrega createdAt y updatedAt automáticamente
       underscored: true, // usa snake_case para nombres de columnas
       freezeTableName: true // mantiene los nombres de tabla como están
     }

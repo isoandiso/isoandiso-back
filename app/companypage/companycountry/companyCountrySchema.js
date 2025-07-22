@@ -4,7 +4,8 @@ const sequelize = require('../../db');
 const countryNames = [
   'Argentina', 'Bolivia', 'Chile', 'Colombia', 'Costa Rica', 'Cuba', 'Ecuador',
   'El Salvador', 'Guatemala', 'Honduras', 'México', 'Nicaragua', 'Panamá',
-  'Paraguay', 'Perú', 'Puerto Rico', 'República Dominicana', 'Uruguay', 'Venezuela'
+  'Paraguay', 'Perú', 'Puerto Rico', 'República Dominicana', 'Uruguay', 'Venezuela',
+  'España', 'Guinea Ecuatorial'
 ];
 
 const CompanyCountry = sequelize.define('companyCountry', {
@@ -15,7 +16,6 @@ const CompanyCountry = sequelize.define('companyCountry', {
   }
 }, {
   tableName: 'company_country',
-  timestamps: true
 });
 
 module.exports = CompanyCountry;

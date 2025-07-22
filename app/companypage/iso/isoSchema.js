@@ -9,7 +9,6 @@ const Iso = sequelize.define('iso', {
   },
 }, {
   tableName: 'iso',
-  timestamps: true,
 });
 
 module.exports = Iso;

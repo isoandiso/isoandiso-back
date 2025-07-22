@@ -29,7 +29,6 @@ const EmployeeCompanyRegistry = sequelize.define('employeeCompanyRegistry', {
   }
 }, {
   tableName: 'employee_company_registry',
-  timestamps: true,
   hooks: {
     beforeValidate: (registry) => {
       if (registry.employeeEmail) {

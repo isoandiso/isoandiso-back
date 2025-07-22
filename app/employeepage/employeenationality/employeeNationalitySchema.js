@@ -9,7 +9,6 @@ const EmployeeNationality = sequelize.define('employee_nationality', {
   },
 }, {
   tableName: 'employee_nationality',
-  timestamps: true,
 });
 
 module.exports = EmployeeNationality;

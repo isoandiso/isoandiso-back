@@ -8,7 +8,6 @@ const GeneralObjective = sequelize.define('general_objective', {
   },
 }, {
   tableName: 'general_objective',
-  timestamps: true,
 });
 
 module.exports = GeneralObjective;

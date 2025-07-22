@@ -30,7 +30,6 @@ const CompanyAcquisition = sequelize.define('companyAcquisition', {
   }
 }, {
   tableName: 'company_acquisition',
-  timestamps: true,
   hooks: {
     beforeSave: async (acquisition) => {
       try {

@@ -17,7 +17,6 @@ const Activity = sequelize.define('activity', {
   },
 }, {
   tableName: 'activity',
-  timestamps: true,
 });
 
 module.exports = Activity;
