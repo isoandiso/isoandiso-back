@@ -35,7 +35,7 @@ const login = async (req) => {
     { path: 'areaIds',
       populate: [
         { path: 'isoIds' },
-        { path: 'employeeIds' },
+        { path: 'employeeId' },
       ]  },
   ])
   .exec();
@@ -77,7 +77,7 @@ const profile = async (req) => {
     { path: 'areaIds',
       populate: [
         { path: 'isoIds' },
-        { path: 'employeeIds' },
+        { path: 'employeeId' },
       ]  },
   ])
   .exec();

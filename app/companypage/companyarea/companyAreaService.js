@@ -48,17 +48,17 @@ const deleteIsos = async (req) => {
 
 const deleteEmployee = async (req) => {
   const areaId = req.params.areaId;
-  const employeeId = req.params.employeeId;
 
   /*eliminamos el empleado del área*/
   const area = await companyAreaSchema.findByIdAndUpdate(
     areaId,
-    { $pull: { employeeIds: employeeId } },
+    { $set: { employeeId: null } },
     { new: true }
   );
 
   return area;
 };
+
 
 const addIso = async (req) => {
   const areaId = req.params.areaId;
@@ -89,7 +89,7 @@ const addResponsibleEmployee = async (req) => {
   /*agregamos al empleado al área*/
   const area = await companyAreaSchema.findByIdAndUpdate(
     areaId,
-    { $push: { employeeIds: employeeId } },
+    { $set: { employeeId: employeeId } },
     { new: true }
   );
 

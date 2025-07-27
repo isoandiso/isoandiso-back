@@ -10,7 +10,7 @@ const companySiteController = require('./companySiteController');
 // RUTAS
 
 //POST
-router.post('/companySite/:companyId', verifyToken, companySiteController.createCompanySite);
+router.post('/companySite', verifyToken, companySiteController.createCompanySite);
 
 //PUTS
 

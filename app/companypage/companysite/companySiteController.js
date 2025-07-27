@@ -6,7 +6,7 @@ const createCompanySite = async (req, res) => {
     const companySite = await companySiteService.createCompanySite(req);
     res.status(201).json(companySite);
   } catch (error) {
-    res.status(error.statusCode || 500).json({ message: 'Error crendo la sede de la empresa o al agregarla a la empresa', error: error.message });
+    res.status(error.statusCode || 500).json({ message: 'Error crendo la sede de la empresa', error: error.message });
   }
 };
 
